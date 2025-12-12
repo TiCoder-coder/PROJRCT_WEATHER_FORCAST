@@ -131,7 +131,7 @@ Trong file có ít nhất 2 sheet:
 
 ## 🔧 Cài đặt & chạy
 
-### 1️⃣ Tạo virtualenv (khuyến nghị)
+### 2 Tạo virtualenv (khuyến nghị)
 
 ```bash
 cd PROJECT_WEATHER_FORECAST
@@ -139,3 +139,12 @@ cd PROJECT_WEATHER_FORECAST
 python3 -m venv venv
 source venv/bin/activate     # Linux/macOS
 # venv\Scripts\activate      # Windows
+
+### 2 Chạy để crawl_data
+
+- Đối với chạy thông thường: python PROJECT_WEATHER_FORECAST/Crawl_data_byAPI.py
+
+- Đối với chạy bằng Docker để chạy ngầm:
+  docker build -t vietnam-weather-crawler .
+
+  docker run -d   --name weather_crawler   --restart=always   -e CRAWL_MODE=continuous   -e OPENWEATHER_API_KEY=.....THAY API OPENWEATHER.......   -e WEATHERAPI_KEY=..........THAY WEATHERAPI..........   -v "$(pwd)/output:/app/output"   -v "$(pwd)/vietnam_weather.db:/app/vietnam_weather.db"   vietnam-weather-crawler
