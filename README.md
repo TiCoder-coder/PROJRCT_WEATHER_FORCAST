@@ -131,16 +131,15 @@ Trong file có ít nhất 2 sheet:
 
 ## 🔧 Cài đặt & chạy
 
-### 2 Tạo virtualenv (khuyến nghị)
+1 Tạo virtualenv (khuyến nghị)
 
-```bash
 cd PROJECT_WEATHER_FORECAST
 
 python3 -m venv venv
 source venv/bin/activate     # Linux/macOS
 # venv\Scripts\activate      # Windows
 
-### 2 Chạy để crawl_data
+2 Chạy để crawl_data
 
 - Đối với chạy thông thường: python PROJECT_WEATHER_FORECAST/Crawl_data_byAPI.py
 
