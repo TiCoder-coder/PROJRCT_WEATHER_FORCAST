@@ -1,9 +1,10 @@
-# 🇻🇳 Vietnam Weather Forecast Crawler
+# 🇻🇳☁️ Vietnam Weather Forecast Crawler
 
 Dự án **thu thập & lưu trữ dữ liệu thời tiết cho các tỉnh/thành phố Việt Nam** từ nhiều nguồn API miễn phí, sau đó **lưu vào SQLite** và **xuất file Excel kèm đánh giá chất lượng dữ liệu**.
 
 ![Picture](https://nub.news/api/image/681000/article.png)
 
+---
 
 ## 🎯 Mục tiêu
 
@@ -57,6 +58,7 @@ Crawler cố gắng lấy dữ liệu theo thứ tự:
      - Giờ trong ngày (sáng / trưa / tối / đêm)
 
 Mỗi bản ghi được gắn:
+
 - `data_source`: openmeteo / weatherapi / openweather / statistical  
 - `data_quality`: high / medium / low (dựa trên nguồn & logic tự đánh giá)
 
@@ -64,11 +66,12 @@ Mỗi bản ghi được gắn:
 
 ## 🗃️ Cấu trúc database SQLite
 
-File database mặc định: **`vietnam_weather.db`**
+📁 File database mặc định: **`vietnam_weather.db`**
 
 Các bảng chính:
 
-### 1. `weather_stations`
+### 1. `weather_stations` 🛰️
+
 Lưu thông tin trạm/địa điểm:
 
 - `station_id` – mã trạm (PRIMARY KEY)
@@ -80,7 +83,8 @@ Lưu thông tin trạm/địa điểm:
 - `latitude`, `longitude` – toạ độ
 - `created_date` – thời gian tạo
 
-### 2. `weather_data`
+### 2. `weather_data` 🌦️
+
 Lưu dữ liệu thời tiết theo thời gian, ví dụ:
 
 - Thông tin chung:
@@ -97,7 +101,8 @@ Lưu dữ liệu thời tiết theo thời gian, ví dụ:
 - `error_reason` – lý do fallback nếu không gọi được API
 - `created_date` – thời gian lưu vào DB
 
-### 3. `data_quality_log`
+### 3. `data_quality_log` 📈
+
 Lưu lại **báo cáo chất lượng** sau mỗi lần crawl:
 
 - `run_timestamp` – thời gian chạy
@@ -119,8 +124,9 @@ Mỗi lần `main()` chạy thành công sẽ tạo một file:
 Trong file có ít nhất 2 sheet:
 
 1. **`WeatherData`**  
-   - Toàn bộ dữ liệu thời tiết đã crawl
+   - Toàn bộ dữ liệu thời tiết đã crawl  
    - Mỗi dòng tương ứng với 1 trạm ở 1 thời điểm
+
 2. **`DataQuality`**  
    - Tổng hợp chất lượng dữ liệu:
      - Số bản ghi high / medium / low
@@ -131,19 +137,28 @@ Trong file có ít nhất 2 sheet:
 
 ## 🔧 Cài đặt & chạy
 
-1 Tạo virtualenv (khuyến nghị)
+### 1️⃣ Tạo virtualenv (khuyến nghị)
 
-cd PROJECT_WEATHER_FORECAST
+  cd PROJECT_WEATHER_FORECAST
 
-python3 -m venv venv
-source venv/bin/activate     # Linux/macOS
-# venv\Scripts\activate      # Windows
+  python3 -m venv venv
+  source venv/bin/activate     # Linux/macOS
+  venv\Scripts\activate        # Windows
 
-2 Chạy để crawl_data
+### 2️⃣ Chạy để crawl_data
 
 - Đối với chạy thông thường: python PROJECT_WEATHER_FORECAST/Crawl_data_byAPI.py
 
 - Đối với chạy bằng Docker để chạy ngầm:
-  docker build -t vietnam-weather-crawler .
+    docker build -t vietnam-weather-crawler .
 
-  docker run -d   --name weather_crawler   --restart=always   -e CRAWL_MODE=continuous   -e OPENWEATHER_API_KEY=.....THAY API OPENWEATHER.......   -e WEATHERAPI_KEY=..........THAY WEATHERAPI..........   -v "$(pwd)/output:/app/output"   -v "$(pwd)/vietnam_weather.db:/app/vietnam_weather.db"   vietnam-weather-crawler
+    docker run -d \
+      --name weather_crawler \
+      --restart=always \
+      -e CRAWL_MODE=continuous \
+      -e OPENWEATHER_API_KEY=.....THAY API OPENWEATHER....... \
+      -e WEATHERAPI_KEY=..........THAY WEATHERAPI.......... \
+      -v "$(pwd)/output:/app/output" \
+      -v "$(pwd)/vietnam_weather.db:/app/vietnam_weather.db" \
+      vietnam-weather-crawler
+
