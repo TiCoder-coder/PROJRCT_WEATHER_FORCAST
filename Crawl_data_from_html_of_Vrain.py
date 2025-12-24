@@ -14,6 +14,40 @@ options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(options=options)
 
+# === 1. LẤY NGÀY VÀ GIỜ CẬP NHẬT TỪ TRANG CHỦ ===
+print("Đang truy cập trang chủ để lấy ngày và giờ cập nhật...")
+driver.get("https://vrain.vn/landing")
+time.sleep(5)
+
+# Lấy toàn bộ văn bản trên trang
+all_text = driver.find_element(By.TAG_NAME, "body").text
+print("  Đang tìm kiếm ngày và giờ trong văn bản trang...")
+
+# Tìm ngày và giờ trong văn bản - THÊM TÌM GIỜ
+date_match = re.search(r'ngày\s*(\d{1,2}/\d{1,2})', all_text)
+hour_match = re.search(r'Tính từ\s*(\d{1,2})h', all_text)  # Tìm giờ từ "Tính từ 19h"
+
+if date_match and hour_match:
+    date_from_main = date_match.group(1)
+    hour_from_main = hour_match.group(1)
+    current_year = datetime.now().strftime("%Y")
+    # Tạo chuỗi ngày và giờ: dd/mm/YYYY HH:00
+    unified_datetime_info = f"{date_from_main}/{current_year} {hour_from_main}:00"
+    print(f"  Đã lấy ngày và giờ cập nhật từ trang chủ: {unified_datetime_info}")
+elif date_match:
+    date_from_main = date_match.group(1)
+    current_year = datetime.now().strftime("%Y")
+    unified_datetime_info = f"{date_from_main}/{current_year}"
+    print(f"  Đã lấy ngày cập nhật từ trang chủ (không có giờ): {unified_datetime_info}")
+else:
+    unified_datetime_info = "N/A"
+    print("  Cảnh báo: Không tìm thấy ngày cập nhật. Sử dụng ngày và giờ hiện tại.")
+    # Sử dụng ngày và giờ hiện tại
+    unified_datetime_info = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+# Lấy thời gian crawl chi tiết (ngày, giờ, phút, giây)
+current_crawl_datetime = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
 # Danh sách các URL tỉnh thành
 province_urls = [
     "https://vrain.vn/20/overview?public_map=windy",
@@ -52,19 +86,16 @@ province_urls = [
     "https://vrain.vn/52/overview?public_map=windy"
 ]
 
-# Lấy ngày hiện tại (ngày crawl) - Định dạng: dd/mm/YYYY
-current_crawl_date = datetime.now().strftime("%d/%m/%Y")
-
 # Mở file CSV để ghi dữ liệu
 with open('luong_mua_thong_ke_selenium.csv', 'w', newline='', encoding='utf-8-sig') as csvfile:
-    # THÊM CỘT "Ngày crawl" vào fieldnames
-    fieldnames = ['Tỉnh', 'Trạm', 'Xã/Phường', 'Lượng mưa (mm)', 'Tình trạng', 'Ngày cập nhật', 'Ngày crawl']
+    # THÊM CỘT "Thời gian crawl" (có giờ, phút, giây)
+    fieldnames = ['Tỉnh', 'Trạm', 'Xã/Phường', 'Lượng mưa (mm)', 'Tình trạng', 'Ngày và giờ cập nhật', 'Thời gian crawl']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
 
     for url in province_urls:
         try:
-            print(f"Đang truy cập: {url}")
+            print(f"\nĐang truy cập: {url}")
             driver.get(url)
             WebDriverWait(driver, 15).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "landing-content"))
@@ -79,15 +110,16 @@ with open('luong_mua_thong_ke_selenium.csv', 'w', newline='', encoding='utf-8-si
             province_name = province_match.group(1).strip() if province_match else "Không xác định"
             print(f"  Tỉnh: {province_name}")
 
-            # 2. Ngày cập nhật (từ trang web)
-            date_match = re.search(r'Lượng mưa tại các trạm đo ngày\s*(\d{1,2}/\d{1,2})', page_html)
-            date_info = date_match.group(1) if date_match else "N/A"
+            # 2. SỬ DỤNG NGÀY VÀ GIỜ ĐÃ LẤY TỪ TRANG CHỦ
+            datetime_info = unified_datetime_info
 
             # 3. Tìm các khối thông tin trạm
             station_blocks = re.findall(r'<div[^>]*class="[^"]*\bgroup\b[^"]*"[^>]*>(.*?)</div>\s*</div>\s*</div>', page_html, re.DOTALL)
             if not station_blocks:
                 station_blocks = re.findall(r'<div[^>]*class="[^"]*\bstation\b[^"]*"[^>]*>(.*?)</div>\s*</div>\s*</div>', page_html, re.DOTALL)
 
+            print(f"  Tìm thấy {len(station_blocks)} khối trạm")
+            
             for block in station_blocks:
                 # Trích xuất thông tin từng trạm
                 station_match = re.search(r'<div[^>]*station-row-1[^>]*>.*?<span[^>]*class="[^"]*\bmax-w-70\b[^"]*"[^>]*>([^<]+)</span>', block, re.DOTALL)
@@ -102,15 +134,15 @@ with open('luong_mua_thong_ke_selenium.csv', 'w', newline='', encoding='utf-8-si
                 status_match = re.search(r'<div[^>]*station-row-2[^>]*>.*?<div[^>]*class="[^"]*\blevel\b[^"]*"[^>]*>.*?<span[^>]*>([^<]+)</span>', block, re.DOTALL)
                 status = status_match.group(1).strip() if status_match else "Không xác định"
 
-                # Ghi dữ liệu vào CSV - THÊM "Ngày crawl"
+                # Ghi dữ liệu vào CSV - SỬA CỘT NGÀY CẬP NHẬT VÀ THÊM THỜI GIAN CRAWL
                 writer.writerow({
                     'Tỉnh': province_name,
                     'Trạm': station_name,
                     'Xã/Phường': xa_phuong,
                     'Lượng mưa (mm)': rainfall,
                     'Tình trạng': status,
-                    'Ngày cập nhật': date_info,
-                    'Ngày crawl': current_crawl_date  # Thêm ngày crawl
+                    'Ngày và giờ cập nhật': datetime_info,  # Có thể có giờ
+                    'Thời gian crawl': current_crawl_datetime  # Có giờ, phút, giây
                 })
 
             print(f"  Đã trích xuất {len(station_blocks)} trạm.")
@@ -121,5 +153,5 @@ with open('luong_mua_thong_ke_selenium.csv', 'w', newline='', encoding='utf-8-si
 # Đóng trình duyệt
 driver.quit()
 print("\n" + "="*50)
-print(f"Hoàn thành! Ngày crawl: {current_crawl_date}")
+print(f"Hoàn thành! Thời gian crawl: {current_crawl_datetime}")
 print("Dữ liệu đã được lưu vào 'luong_mua_thong_ke_selenium.csv'")
