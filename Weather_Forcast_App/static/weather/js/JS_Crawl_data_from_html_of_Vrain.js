@@ -1,3 +1,8 @@
+function getCookie(name) {
+  const v = document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
+  return v ? v.pop() : "";
+}
+
 (function () {
   const cfg = window.__VRAIN_HTML__ || {};
   const logBox = document.getElementById("log-container");

@@ -9,7 +9,7 @@ from django.http import JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render
 
 
-APP_ROOT = Path(__file__).resolve().parents[1]  # Weather_Forcast_App/
+APP_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = APP_ROOT / "scripts" / "Crawl_data_from_html_of_Vrain.py"
 OUTPUT_DIR = APP_ROOT / "output"
 
