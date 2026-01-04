@@ -153,6 +153,36 @@
       min-width: 100px;
     }
     
+    /* Cột nguồn dữ liệu */
+    .source-cell {
+      min-width: 140px;
+      text-align: center;
+    }
+    
+    .source-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: center;
+      min-width: 110px;
+    }
+    
+    .source-vrain {
+      background: linear-gradient(135deg, rgba(159, 122, 234, 0.3), rgba(124, 58, 237, 0.4));
+      color: #d6bcfa;
+      border: 1px solid rgba(159, 122, 234, 0.5);
+    }
+    
+    .source-openweather {
+      background: linear-gradient(135deg, rgba(56, 178, 172, 0.3), rgba(49, 130, 206, 0.4));
+      color: #90cdf4;
+      border: 1px solid rgba(56, 178, 172, 0.5);
+    }
+    
     /* Nút và các hành động */
     .pill {
       padding: 12px 28px;
@@ -404,6 +434,12 @@
         align-items: flex-start;
         gap: 10px;
       }
+      
+      .source-badge {
+        min-width: 90px;
+        padding: 6px 12px;
+        font-size: 12px;
+      }
     }
     
     /* Hiệu ứng cho các tiêu đề bảng */
@@ -488,9 +524,10 @@
       <table style="margin: 0 25px 35px;">
         <thead>
           <tr>
-            <th style="width: 35%;">📄 TÊN TỆP</th>
-            <th style="width: 25%;">🕐 CẬP NHẬT</th>
-            <th style="width: 15%;">📦 DUNG LƯỢNG</th>
+            <th style="width: 30%;">📄 TÊN TỆP</th>
+            <th style="width: 15%;">🌐 NGUỒN DỮ LIỆU</th>
+            <th style="width: 20%;">🕐 CẬP NHẬT</th>
+            <th style="width: 10%;">📦 DUNG LƯỢNG</th>
             <th style="width: 25%;">⚡ THAO TÁC</th>
           </tr>
         </thead>
@@ -499,6 +536,13 @@
           {% if f.name|slice:"-5:" == ".xlsx" %}
           <tr>
             <td><div class="file-name">{{ f.name }}</div></td>
+            <td class="source-cell">
+              {% if "merged_vrain_" in f.name %}
+                <span class="source-badge source-vrain">VRAIN</span>
+              {% else %}
+                <span class="source-badge source-openweather">OPENWEATHER</span>
+              {% endif %}
+            </td>
             <td class="time-cell">{{ f.mtime }}</td>
             <td class="size-cell">{{ f.size_mb }} MB</td>
             <td>
