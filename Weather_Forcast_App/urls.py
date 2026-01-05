@@ -3,11 +3,7 @@ from .views.Home import home_view
 from .views.View_Crawl_data_by_API import crawl_api_weather_view, api_weather_logs_view
 from .views.View_Crawl_data_by_API import crawl_vrain_html_view
 from .views.View_Datasets import datasets_view, dataset_download_view, dataset_view_view
-from .views.View_Crawl_data_from_html_of_Vrain import (
-    crawl_vrain_html_view,
-    crawl_vrain_html_start_view,
-    crawl_vrain_html_tail_view,
-)
+from .views.View_Merge_Data import merge_data_view
 from .views.View_Crawl_data_from_html_of_Vrain import (
     crawl_vrain_html_view,
     crawl_vrain_html_start_view,
@@ -23,6 +19,7 @@ from .views.View_Crawl_data_from_Vrain_by_Selenium import (
     crawl_vrain_selenium_start_view,
     crawl_vrain_selenium_tail_view,
 )
+
 app_name = "weather"
 
 urlpatterns = [
@@ -32,13 +29,6 @@ urlpatterns = [
     path("crawl-by-api/", crawl_api_weather_view, name="crawl_by_api"),
 
     path("crawl-api-weather/logs/", api_weather_logs_view, name="crawl_api_weather_logs"),
-
-    path("crawl-vrain-html/", crawl_vrain_html_view, name="crawl_vrain_html"),
-
-
-    path("crawl-vrain-html/", crawl_vrain_html_view, name="crawl_vrain_html"),
-    path("crawl-vrain-html/start/", crawl_vrain_html_start_view, name="crawl_vrain_html_start"),
-    path("crawl-vrain-html/tail/", crawl_vrain_html_tail_view, name="crawl_vrain_html_tail"),
 
     path("crawl-vrain-html/", crawl_vrain_html_view, name="crawl_vrain_html"),
     path("crawl-vrain-html/start/", crawl_vrain_html_start_view, name="crawl_vrain_html_start"),
@@ -52,9 +42,11 @@ urlpatterns = [
     path("crawl-vrain-selenium/start/", crawl_vrain_selenium_start_view, name="crawl_vrain_selenium_start"),
     path("crawl-vrain-selenium/tail/", crawl_vrain_selenium_tail_view, name="crawl_vrain_selenium_tail"),
 
-
-
+    # Datasets paths - Updated to include folder parameter
     path("datasets/", datasets_view, name="datasets"),
-    path("datasets/view/<str:filename>/", dataset_view_view, name="dataset_view"),
-    path("datasets/download/<str:filename>/", dataset_download_view, name="dataset_download"),
+    path("datasets/view/<str:folder>/<str:filename>/", dataset_view_view, name="dataset_view"),
+    path("datasets/download/<str:folder>/<str:filename>/", dataset_download_view, name="dataset_download"),
+    
+    # Merge data endpoint
+    path("datasets/merge/", merge_data_view, name="merge_data"),
 ]
