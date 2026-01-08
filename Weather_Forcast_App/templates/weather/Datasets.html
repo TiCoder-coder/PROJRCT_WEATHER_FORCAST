@@ -5,496 +5,17 @@
   <meta charset="UTF-8" />
   <title>Dữ liệu</title>
   <link rel="stylesheet" href="{% static 'weather/css/Home.css' %}">
-  <link rel="stylesheet" href="{% static 'weather/css/Datasets.css' %}">
+  <link rel="stylesheet" href="{% static 'weather/css/Datasets.css' %}?v=9199999998888899988888908_01">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    /* Nền xanh navy đậm và các điều chỉnh */
-    body.home-page {
-      background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
-      min-height: 100vh;
-      color: #e2e8f0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    }
-    
-    .datasets-wrap {
-      max-width: 1300px;
-      margin: 0 auto;
-      padding: 30px 20px;
-    }
-    
-    .datasets-card {
-      background: rgba(22, 32, 45, 0.85);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
-      margin-bottom: 35px;
-      border: 1px solid rgba(56, 178, 172, 0.15);
-      overflow: hidden;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .datasets-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-    }
-    
-    /* Tiêu đề và chữ */
-    .datasets-title {
-      padding: 30px 35px 20px;
-      background: linear-gradient(to right, rgba(26, 54, 93, 0.9), rgba(22, 32, 45, 0.9));
-      border-bottom: 1px solid rgba(56, 178, 172, 0.2);
-    }
-    
-    .page-title {
-      font-size: 32px;
-      font-weight: 800;
-      margin-bottom: 10px;
-      background: linear-gradient(135deg, #38b2ac, #4299e1);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 10px rgba(56, 178, 172, 0.2);
-      letter-spacing: 0.5px;
-    }
-    
-    .page-title.merged {
-      background: linear-gradient(135deg, #9f7aea, #d6bcfa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    .page-sub {
-      color: #a0aec0;
-      font-size: 16px;
-      max-width: 700px;
-      line-height: 1.6;
-      font-weight: 500;
-    }
-    
-    .title-underline {
-      height: 4px;
-      width: 90px;
-      border-radius: 2px;
-      margin-top: 12px;
-      background: linear-gradient(135deg, #38b2ac, #4299e1);
-    }
-    
-    .title-underline.merged {
-      background: linear-gradient(135deg, #9f7aea, #d6bcfa);
-    }
-    
-    /* Bảng dữ liệu */
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-    }
-    
-    thead {
-      background: linear-gradient(135deg, rgba(26, 54, 93, 0.9), rgba(30, 64, 175, 0.8));
-      color: white;
-      position: sticky;
-      top: 0;
-    }
-    
-    thead th {
-      padding: 20px 18px;
-      font-weight: 700;
-      text-align: left;
-      font-size: 15px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      border-bottom: 2px solid #38b2ac;
-      color: #e2e8f0;
-    }
-    
-    tbody tr {
-      border-bottom: 1px solid rgba(56, 178, 172, 0.1);
-      transition: all 0.25s ease;
-    }
-    
-    tbody tr:hover {
-      background: rgba(56, 178, 172, 0.1);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-    
-    tbody td {
-      padding: 18px;
-      color: #cbd5e0;
-      font-size: 15px;
-      font-weight: 500;
-      border-bottom: 1px solid rgba(56, 178, 172, 0.05);
-    }
-    
-    .file-name {
-      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-      font-weight: 700;
-      color: #38b2ac;
-      background: rgba(56, 178, 172, 0.1);
-      padding: 10px 15px;
-      border-radius: 10px;
-      border-left: 4px solid #38b2ac;
-      word-break: break-word;
-      font-size: 15px;
-      letter-spacing: 0.3px;
-    }
-    
-    .time-cell {
-      color: #a0aec0;
-      font-weight: 600;
-      min-width: 180px;
-      font-size: 14.5px;
-    }
-    
-    .size-cell {
-      color: #fbb6ce;
-      font-weight: 700;
-      font-size: 16px;
-      min-width: 100px;
-    }
-    
-    /* Cột nguồn dữ liệu */
-    .source-cell {
-      min-width: 140px;
-      text-align: center;
-    }
-    
-    .source-badge {
-      display: inline-block;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-weight: 800;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      text-align: center;
-      min-width: 110px;
-    }
-    
-    .source-vrain {
-      background: linear-gradient(135deg, rgba(159, 122, 234, 0.3), rgba(124, 58, 237, 0.4));
-      color: #d6bcfa;
-      border: 1px solid rgba(159, 122, 234, 0.5);
-    }
-    
-    .source-openweather {
-      background: linear-gradient(135deg, rgba(56, 178, 172, 0.3), rgba(49, 130, 206, 0.4));
-      color: #90cdf4;
-      border: 1px solid rgba(56, 178, 172, 0.5);
-    }
-    
-    /* Nút và các hành động */
-    .pill {
-      padding: 12px 28px;
-      border-radius: 30px;
-      font-weight: 700;
-      font-size: 15px;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border: none;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      letter-spacing: 0.5px;
-    }
-    
-    #btnBack {
-      background: rgba(113, 128, 150, 0.3);
-      color: #cbd5e0;
-      border: 1px solid rgba(113, 128, 150, 0.5);
-    }
-    
-    #btnBack:hover {
-      background: rgba(113, 128, 150, 0.5);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-    }
-    
-    a.pill.primary {
-      background: linear-gradient(135deg, #4299e1, #3182ce);
-      color: white;
-      font-weight: 700;
-    }
-    
-    a.pill.primary:hover {
-      background: linear-gradient(135deg, #3182ce, #2c5282);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(66, 153, 225, 0.4);
-    }
-    
-    #btnMerge {
-      background: linear-gradient(135deg, #9f7aea, #805ad5);
-      color: white;
-      border: none;
-      font-weight: 700;
-    }
-    
-    #btnMerge:hover:not(:disabled) {
-      background: linear-gradient(135deg, #805ad5, #6b46c1);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(159, 122, 234, 0.4);
-    }
-    
-    #btnMerge:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-    
-    .pill.small {
-      padding: 10px 20px;
-      font-size: 14px;
-      font-weight: 700;
-      border-radius: 25px;
-      min-width: 100px;
-    }
-    
-    .op-actions {
-      display: flex;
-      gap: 12px;
-      min-width: 180px;
-    }
-    
-    .pill.small[style*="background: #48bb78"] {
-      background: linear-gradient(135deg, #48bb78, #38a169) !important;
-      color: white;
-      border: none;
-    }
-    
-    .pill.small[style*="background: #48bb78"]:hover {
-      background: linear-gradient(135deg, #38a169, #2f855a) !important;
-      transform: translateY(-2px);
-    }
-    
-    .pill.small[style*="background: #4299e1"] {
-      background: linear-gradient(135deg, #4299e1, #3182ce) !important;
-      color: white;
-      border: none;
-    }
-    
-    .pill.small[style*="background: #4299e1"]:hover {
-      background: linear-gradient(135deg, #3182ce, #2c5282) !important;
-      transform: translateY(-2px);
-    }
-    
-    /* Latest bar và section badge */
-    .latest-bar {
-      padding: 18px 25px;
-      margin: 0 25px 25px;
-      border-radius: 12px;
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 600;
-      background: rgba(30, 41, 59, 0.7);
-      border: 1px solid rgba(56, 178, 172, 0.2);
-    }
-    
-    .latest-bar.merged {
-      background: rgba(79, 70, 229, 0.1);
-      border-left: 5px solid #9f7aea;
-    }
-    
-    .latest-bar:not(.merged) {
-      background: rgba(56, 178, 172, 0.1);
-      border-left: 5px solid #38b2ac;
-    }
-    
-    .section-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 12px 25px;
-      margin: 0 25px 25px;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 16px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-    
-    .section-badge.merged {
-      background: linear-gradient(135deg, rgba(159, 122, 234, 0.2), rgba(124, 58, 237, 0.3));
-      color: #d6bcfa;
-      border: 1px solid rgba(159, 122, 234, 0.4);
-    }
-    
-    .section-badge.output {
-      background: linear-gradient(135deg, rgba(56, 178, 172, 0.2), rgba(49, 130, 206, 0.3));
-      color: #90cdf4;
-      border: 1px solid rgba(56, 178, 172, 0.4);
-    }
-    
-    /* Trạng thái trống */
-    .empty-state {
-      padding: 70px 20px;
-      text-align: center;
-      color: #718096;
-    }
-    
-    .empty-state-icon {
-      font-size: 72px;
-      margin-bottom: 25px;
-      opacity: 0.4;
-    }
-    
-    .empty-state div {
-      font-size: 17px;
-      color: #a0aec0;
-      font-weight: 600;
-    }
-    
-    /* Trạng thái merge */
-    .merge-status {
-      margin: 20px 25px;
-      padding: 18px 25px;
-      border-radius: 12px;
-      font-weight: 700;
-      display: none;
-      border: 1px solid transparent;
-      font-size: 15px;
-    }
-    
-    .merge-status.show {
-      display: block;
-      animation: slideIn 0.4s ease;
-    }
-    
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-15px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .merge-status.processing {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fbbf24;
-      border-color: rgba(245, 158, 11, 0.3);
-    }
-    
-    .merge-status.success {
-      background: rgba(72, 187, 120, 0.15);
-      color: #68d391;
-      border-color: rgba(72, 187, 120, 0.3);
-    }
-    
-    .merge-status.error {
-      background: rgba(245, 101, 101, 0.15);
-      color: #fc8181;
-      border-color: rgba(245, 101, 101, 0.3);
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-      .datasets-wrap {
-        padding: 20px 15px;
-      }
-      
-      .datasets-title {
-        padding: 25px 20px;
-        flex-direction: column;
-        gap: 20px;
-      }
-      
-      .page-title {
-        font-size: 28px;
-      }
-      
-      .actions {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      
-      .pill {
-        width: 100%;
-        justify-content: center;
-      }
-      
-      table {
-        display: block;
-        overflow-x: auto;
-        margin: 0 15px 20px;
-      }
-      
-      .op-actions {
-        flex-direction: column;
-        gap: 10px;
-      }
-      
-      .latest-bar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-      
-      .source-badge {
-        min-width: 90px;
-        padding: 6px 12px;
-        font-size: 12px;
-      }
-    }
-    
-    /* Hiệu ứng cho các tiêu đề bảng */
-    thead th:first-child {
-      border-top-left-radius: 10px;
-    }
-    
-    thead th:last-child {
-      border-top-right-radius: 10px;
-    }
-    
-    /* Tăng độ đậm cho chữ trong các phần quan trọng */
-    b, strong {
-      font-weight: 800;
-      color: #e2e8f0;
-    }
-    
-    .latest-bar b {
-      color: #38b2ac;
-    }
-    
-    .latest-bar.merged b {
-      color: #d6bcfa;
-    }
-    
-    /* Scrollbar tùy chỉnh */
-    ::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-    }
-    
-    ::-webkit-scrollbar-track {
-      background: rgba(22, 32, 45, 0.5);
-      border-radius: 5px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-      background: rgba(56, 178, 172, 0.5);
-      border-radius: 5px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(56, 178, 172, 0.7);
-    }
-  </style>
 </head>
 
 <body class="home-page">
   <div class="datasets-wrap">
 
-    <!-- SECTION 1: DỮ LIỆU ĐÃ GỘP (MERGE_DATA) -->
     <div class="datasets-card">
       <div class="datasets-title" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
         <div class="title-block">
-          <h1 class="page-title merged">DỮ LIỆU ĐÃ GỘP</h1>
+          <h1 class="page-title merged">DỮ LIỆU ĐÃ GỘP (DỮ LIỆU CHUNG)</h1>
           <div class="page-sub">Các tệp dữ liệu đã được gộp và lưu trữ tập trung. Dữ liệu đã xử lý sẵn sàng để phân tích.</div>
           <div class="title-underline merged"></div>
         </div>
@@ -506,14 +27,17 @@
       </div>
 
       {% if latest_merged %}
-        <div class="latest-bar merged muted">
-          <span style="font-weight: 800; color: #d6bcfa;">📅 MỚI NHẤT:</span>
-          <span style="flex: 1;"><b>{{ latest_merged.name }}</b></span>
-          <span style="display: flex; gap: 20px; font-weight: 700;">
-            <span style="color: #fbb6ce;">📦 {{ latest_merged.size_mb }} MB</span>
-            <span style="color: #90cdf4;">🕐 {{ latest_merged.mtime }}</span>
+        <div class="latest-bar cleaned muted latest-card" style="margin: 14px 0 0;">
+          <span class="latest-label">📅 MỚI NHẤT:</span>
+          <span class="latest-name" title="{{ latest_cleaned_merge.name }}">
+            <b>{{ latest_cleaned_merge.name }}</b>
+          </span>
+          <span class="latest-meta">
+            <span class="latest-size">📦 {{ latest_cleaned_merge.size_mb }} MB</span>
+            <span class="latest-time">🕐 {{ latest_cleaned_merge.mtime }}</span>
           </span>
         </div>
+
       {% else %}
         <div class="latest-bar merged muted" style="font-weight: 700;">📭 CHƯA CÓ TỆP ĐÃ GỘP TRONG THƯ MỤC MERGE_DATA/</div>
       {% endif %}
@@ -524,31 +48,64 @@
       <table style="margin: 0 25px 35px;">
         <thead>
           <tr>
-            <th style="width: 30%;">📄 TÊN TỆP</th>
-            <th style="width: 15%;">🌐 NGUỒN DỮ LIỆU</th>
-            <th style="width: 20%;">🕐 CẬP NHẬT</th>
-            <th style="width: 10%;">📦 DUNG LƯỢNG</th>
-            <th style="width: 25%;">⚡ THAO TÁC</th>
+            <th style="width:170px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">📄</span>
+                <span>TÊN TỆP</span>
+              </span>
+            </th>
+
+            <th style="width:220px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">🌐</span>
+                <span>NGUỒN DỮ LIỆU</span>
+              </span>
+            </th>
+
+            <th style="width:220px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">🕐</span>
+                <span>CẬP NHẬT</span>
+              </span>
+            </th>
+
+            <th style="width:220px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">📦</span>
+                <span>DUNG LƯỢNG</span>
+              </span>
+            </th>
+
+            <th style="width:170px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">⚡</span>
+                <span>THAO TÁC</span>
+              </span>
+            </th>
+
+
           </tr>
         </thead>
         <tbody>
         {% for f in merged_items %}
-          {% if f.name|slice:"-5:" == ".xlsx" %}
+          {% if f.name|slice:"-5:" == ".xlsx" or f.name|slice:"-4:" == ".csv" %}
           <tr>
             <td><div class="file-name">{{ f.name }}</div></td>
             <td class="source-cell">
               {% if "merged_vrain_" in f.name %}
                 <span class="source-badge source-vrain">VRAIN</span>
-              {% else %}
+              {% elif "merged_weather" in f.name %}
                 <span class="source-badge source-openweather">OPENWEATHER</span>
+              {% else %}
+                <span class="source-badge source-openweather">ĐÃ GỘP</span>
               {% endif %}
             </td>
             <td class="time-cell">{{ f.mtime }}</td>
             <td class="size-cell">{{ f.size_mb }} MB</td>
             <td>
               <div class="op-actions">
-                <a class="pill small" href="{% url 'weather:dataset_view' 'merged' f.name %}" style="background: #48bb78; color: white;">👀 XEM</a>
-                <a class="pill small primary" href="{% url 'weather:dataset_download' 'merged' f.name %}" style="background: #4299e1; color: white;">⬇️ TẢI</a>
+                <a class="pill small" href="{% url 'weather:dataset_view' 'merged' f.name %}">👀 XEM</a>
+                <a class="pill small primary" href="{% url 'weather:dataset_download' 'merged' f.name %}">⬇️ TẢI</a>
               </div>
             </td>
           </tr>
@@ -563,12 +120,196 @@
       </div>
       {% endif %}
     </div>
-    
-    <!-- SECTION 2: DỮ LIỆU GẦN ĐÂY (OUTPUT) -->
+
     <div class="datasets-card">
       <div class="datasets-title" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
         <div class="title-block">
-          <h1 class="page-title">DỮ LIỆU GẦN ĐÂY</h1>
+          <h1 class="page-title cleaned">LÀM SẠCH DỮ LIỆU && BỘ DỮ LIỆU ĐÃ LÀM SẠCH (GẦN ĐÂY)</h1>
+          <div class="page-sub">Dữ liệu đã được xử lý, làm sạch và chuẩn hóa từ file đã gộp. Sẵn sàng cho phân tích nâng cao và machine learning.</div>
+          <div class="title-underline cleaned"></div>
+        </div>
+
+        <div class="actions" style="display: flex; gap: 15px; margin-top: 10px;">
+          <button type="button" class="pill" id="btnClean">🧹 LÀM SẠCH DỮ LIỆU</button>
+        </div>
+
+        
+      </div>
+
+      <div id="cleanStatus" class="merge-status"></div>
+
+
+      <div class="section-badge cleaned">🧼 DỮ LIỆU SAU KHI LÀM SẠCH </div>
+
+      <div class="clean-split">
+
+        <div class="clean-card">
+          <div class="clean-card__head">
+            <div class="clean-card__title">🧩DỮ LIỆU LÀM SẠCH ĐÃ GỘP</div>
+            <div class="clean-card__badge">Nguồn: Merge_data</div>
+          </div>
+
+          {% if latest_cleaned_merge %}
+            <div class="latest-bar cleaned muted latest-card" style="margin: 14px 0 0;">
+              <span class="latest-label">📅 MỚI NHẤT:</span>
+              <span class="latest-name" title="{{ latest_cleaned_merge.name }}">
+                <b>{{ latest_cleaned_merge.name }}</b>
+              </span>
+              <span class="latest-meta">
+                <span class="latest-size">📦 {{ latest_cleaned_merge.size_mb }} MB</span>
+                <span class="latest-time">🕐 {{ latest_cleaned_merge.mtime }}</span>
+              </span>
+            </div>
+
+
+          {% else %}
+            <div class="latest-bar cleaned muted" style="margin: 14px 0 0; font-weight:700;">📭 Chưa có file clean cho MERGE</div>
+          {% endif %}
+
+          {% if cleaned_merge_items %}
+            <div class="mini-list">
+              {% for f in cleaned_merge_items|slice:":6" %}
+                <div class="mini-item">
+                  <div class="mini-name">{{ f.name }}</div>
+                  <div class="mini-actions">
+                    <a class="pill small" href="{% url 'weather:dataset_view' f.folder f.name %}">👀 XEM</a>
+                    <a class="pill small primary" href="{% url 'weather:dataset_download' f.folder f.name %}">⬇️ TẢI</a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-state" style="padding: 30px 10px;">
+              <div class="empty-state-icon" style="font-size:46px;">🧩</div>
+              <div>Chưa có file clean cho nhóm MERGE.</div>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="clean-card">
+          <div class="clean-card__head">
+            <div class="clean-card__title">📦 DỮ LIỆU LÀM SẠCH CHƯA GỘP</div>
+            <div class="clean-card__badge">Nguồn: output</div>
+          </div>
+
+          {% if latest_cleaned_raw %}
+            <div class="latest-bar cleaned muted latest-card" style="margin: 14px 0 0;">
+              <span class="latest-label">📅 MỚI NHẤT:</span>
+              <span class="latest-name" title="{{ latest_cleaned_merge.name }}">
+                <b>{{ latest_cleaned_merge.name }}</b>
+              </span>
+              <span class="latest-meta">
+                <span class="latest-size">📦 {{ latest_cleaned_merge.size_mb }} MB</span>
+                <span class="latest-time">🕐 {{ latest_cleaned_merge.mtime }}</span>
+              </span>
+            </div>
+
+          {% else %}
+            <div class="latest-bar cleaned muted" style="margin: 14px 0 0; font-weight:700;">📭 Chưa có file clean cho OUTPUT</div>
+          {% endif %}
+
+          {% if cleaned_raw_items %}
+            <div class="mini-list">
+              {% for f in cleaned_raw_items|slice:":6" %}
+                <div class="mini-item">
+                  <div class="mini-name">{{ f.name }}</div>
+                  <div class="mini-actions">
+                    <a class="pill small" href="{% url 'weather:dataset_view' 'cleaned_raw' f.name %}" style="background: #48bb78; color: white;">👀 XEM</a>
+                    <a class="pill small primary" href="{% url 'weather:dataset_download' 'cleaned_raw' f.name %}" style="background: #4299e1; color: white;">⬇️ TẢI</a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-state" style="padding: 30px 10px;">
+              <div class="empty-state-icon" style="font-size:46px;">📦</div>
+              <div>Chưa có file clean cho nhóm OUTPUT.</div>
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+
+
+      <div class="section-badge cleaned">📊 TỔNG HỢP CÁC FILE LÀM SẠCH (GẦN ĐÂY)</div>
+
+      {% if cleaned_items %}
+      <table style="margin: 0 25px 35px;">
+        <thead>
+          <tr>
+            <th style="width:170px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">📄</span>
+                <span>TÊN TỆP</span>
+              </span>
+            </th>
+
+            <th style="width:220px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">🌐</span>
+                <span>NGUỒN DỮ LIỆU</span>
+              </span>
+            </th>
+
+            <th style="width:220px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">🕐</span>
+                <span>CẬP NHẬT</span>
+              </span>
+            </th>
+
+            <th style="width:220px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">📦</span>
+                <span>DUNG LƯỢNG</span>
+              </span>
+            </th>
+
+            <th style="width:170px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">⚡</span>
+                <span>THAO TÁC</span>
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for f in cleaned_items %}
+          {% if f.name|slice:"-4:" == ".csv" or f.name|slice:"-5:" == ".xlsx" %}
+          <tr>
+            <td><div class="file-name cleaned">{{ f.name }}</div></td>
+            <td class="source-cell">
+              <span class="source-badge source-cleaned">ĐÃ LÀM SẠCH</span>
+            </td>
+            <td class="time-cell">{{ f.mtime }}</td>
+            <td class="size-cell">{{ f.size_mb }} MB</td>
+            <td>
+              <div class="op-actions">
+                <a class="pill small"
+                  href="{% url 'weather:dataset_view' f.folder|default:'cleaned' f.name %}">👀 XEM</a>
+
+                <a class="pill small primary"
+                  href="{% url 'weather:dataset_download' f.folder|default:'cleaned' f.name %}">⬇️ TẢI</a>
+
+              </div>
+            </td>
+          </tr>
+          {% endif %}
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">🧹</div>
+        <div>CHƯA CÓ DỮ LIỆU ĐÃ LÀM SẠCH. NHẤN NÚT "🧹 LÀM SẠCH DỮ LIỆU" ĐỂ BẮT ĐẦU.</div>
+      </div>
+      {% endif %}
+    </div>
+    
+    <div class="datasets-card">
+      <div class="datasets-title" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
+        <div class="title-block">
+          <h1 class="page-title">DỮ LIỆU THÔ (CHƯA QUA XỬ LÍ) GẦN ĐÂY</h1>
           <div class="page-sub">Duyệt, xem trước và tải xuống các tệp đã thu thập gần nhất. Dữ liệu thô từ các nguồn.</div>
           <div class="title-underline"></div>
         </div>
@@ -579,14 +320,17 @@
       </div>
 
       {% if latest_output %}
-        <div class="latest-bar muted">
-          <span style="font-weight: 800; color: #38b2ac;">📅 MỚI NHẤT:</span>
-          <span style="flex: 1;"><b>{{ latest_output.name }}</b></span>
-          <span style="display: flex; gap: 20px; font-weight: 700;">
-            <span style="color: #fbb6ce;">📦 {{ latest_output.size_mb }} MB</span>
-            <span style="color: #90cdf4;">🕐 {{ latest_output.mtime }}</span>
+        <div class="latest-bar cleaned muted latest-card" style="margin: 14px 0 0;">
+          <span class="latest-label">📅 MỚI NHẤT:</span>
+          <span class="latest-name" title="{{ latest_cleaned_merge.name }}">
+            <b>{{ latest_cleaned_merge.name }}</b>
+          </span>
+          <span class="latest-meta">
+            <span class="latest-size">📦 {{ latest_cleaned_merge.size_mb }} MB</span>
+            <span class="latest-time">🕐 {{ latest_cleaned_merge.mtime }}</span>
           </span>
         </div>
+
       {% else %}
         <div class="latest-bar muted" style="font-weight: 700;">📭 KHÔNG CÓ TỆP NÀO TRONG THƯ MỤC OUTPUT/</div>
       {% endif %}
@@ -599,15 +343,39 @@
       <table style="margin: 0 25px 35px;">
         <thead>
           <tr>
-            <th style="width: 35%;">📄 TÊN TỆP</th>
-            <th style="width: 25%;">🕐 CẬP NHẬT</th>
-            <th style="width: 15%;">📦 DUNG LƯỢNG</th>
-            <th style="width: 25%;">⚡ THAO TÁC</th>
+            <th style="width:170px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">📄</span>
+                <span>TÊN TỆP</span>
+              </span>
+            </th>
+
+
+            <th style="width:220px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">🕐</span>
+                <span>CẬP NHẬT</span>
+              </span>
+            </th>
+
+            <th style="width:220px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">📦</span>
+                <span>DUNG LƯỢNG</span>
+              </span>
+            </th>
+
+            <th style="width:170px;" class="th-center">
+              <span class="th-inner">
+                <span class="th-ico">⚡</span>
+                <span>THAO TÁC</span>
+              </span>
+            </th>
           </tr>
         </thead>
         <tbody>
         {% for f in output_items %}
-          {% if f.name|slice:"-5:" == ".xlsx" %}
+          {% if f.name|slice:"-5:" == ".xlsx" or f.name|slice:"-4:" == ".csv" %}
           <tr>
             <td><div class="file-name">{{ f.name }}</div></td>
             <td class="time-cell">{{ f.mtime }}</td>
@@ -632,14 +400,133 @@
     </div>
 
   </div>
+  <div class="cw-overlay" id="cwOverlay" style="display:none;">
+      <div class="cw-modal">
+        <div class="cw-top">
+          <div>
+            <div class="cw-title">🧼 SƠ ĐỒ LUỒNG LÀM SẠCH DỮ LIỆU</div>
+            <div class="cw-sub">Chọn nguồn → chọn file → xem tiến trình → tải kết quả</div>
+          </div>
+          <button class="pill" id="cwClose">✕</button>
+        </div>
+
+        <div class="cw-step" id="cwStep1">
+          <div class="cw-grid2">
+            <button class="cw-choice" data-source="merge">
+              <div class="cw-choice__t">🧩 FILE ĐÃ GỘP</div>
+              <div class="cw-choice__d">Đọc từ Merge_data → lưu vào Clean_Data_For_File_Merge</div>
+            </button>
+
+            <button class="cw-choice" data-source="output">
+              <div class="cw-choice__t">📦 FILE CHƯA GỘP</div>
+              <div class="cw-choice__d">Đọc từ output → lưu vào Clean_Data_For_File_Not_Merge</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="cw-step" id="cwStep2" style="display:none;">
+          <div class="cw-row">
+            <div class="cw-pill" id="cwSourceLabel">Nguồn: —</div>
+            <input class="cw-search" id="cwSearch" placeholder="Tìm file..." />
+            <button class="pill" id="cwBack">↩ QUAY LẠI</button>
+          </div>
+
+          <div class="cw-filelist" id="cwFileList"></div>
+
+          <div class="cw-actions">
+            <button class="pill" id="cwStart" disabled style="background:linear-gradient(135deg,#48bb78,#38a169);color:#fff;">🚀 BẮT ĐẦU LÀM SẠCH</button>
+          </div>
+        </div>
+
+        <div class="cw-step" id="cwStep3" style="display:none;">
+          <div class="cw-progress">
+            <div class="cw-bar"><div class="cw-bar__fill" id="cwBarFill" style="width:0%;"></div></div>
+            <div class="cw-prow">
+              <div class="cw-steptext" id="cwStepText">Đang khởi tạo…</div>
+              <div class="cw-pct" id="cwPct">0%</div>
+            </div>
+          </div>
+
+          <div class="cw-log" id="cwLog"></div>
+          <div class="cw-report" id="cwReport" style="display:none;"></div>
+
+          <div class="cw-actions">
+            <a class="pill" id="cwViewBtn" href="#" style="display:none;background:#48bb78;color:#fff;">👀 XEM NGAY</a>
+            <a class="pill primary" id="cwDownloadBtn" href="#" style="display:none;background:#4299e1;color:#fff;">⬇️ TẢI VỀ</a>
+            <button class="pill" id="cwDone" style="display:none;">✅ Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="mergeResultModal" class="wf-modal" aria-hidden="true">
+      <div class="wf-modal__backdrop" data-close="1"></div>
+
+      <div class="wf-modal__panel" role="dialog" aria-modal="true" aria-labelledby="mergeModalTitle">
+        <button class="wf-modal__close" type="button" data-close="1">✕</button>
+
+        <h3 id="mergeModalTitle">✅ GỘP DỮ LIỆU HOÀN TẤT</h3>
+        <p id="mergeModalMsg" class="wf-modal__msg"></p>
+
+        <div class="wf-modal__file">
+          <div class="wf-kv"><span>📄 Tệp:</span> <b id="mergeFileName">—</b></div>
+          <div class="wf-kv"><span>📦 Dung lượng:</span> <b id="mergeFileSize">—</b></div>
+          <div class="wf-kv"><span>🕐 Cập nhật:</span> <b id="mergeFileTime">—</b></div>
+        </div>
+
+        <div class="wf-modal__actions">
+          <a id="mergeViewBtn" class="pill" href="#">👀 XEM</a>
+          <a id="mergeDownloadBtn" class="pill primary" href="#">⬇️ TẢI</a>
+          <button class="pill" type="button" data-close="1">✖ ĐÓNG</button>
+        </div>
+      </div>
+    </div>
 
   <script>
+    <!-- CLEAN WIZARD MODAL -->
+    
+
     document.addEventListener("DOMContentLoaded", function () {
       const btnBack = document.getElementById("btnBack");
       const btnMerge = document.getElementById("btnMerge");
-      const statusEl = document.getElementById("mergeStatus");
+      const btnClean = document.getElementById("btnClean");
+      const mergeStatusEl = document.getElementById("mergeStatus");
+      const cleanStatusEl = document.getElementById("cleanStatus");
+      function openMergeModal(file, msg){
+        const modal = document.getElementById('mergeResultModal');
+        if (!modal) return;
 
-      // Back button functionality
+        document.getElementById('mergeModalMsg').textContent = msg || 'Gộp dữ liệu thành công!';
+        document.getElementById('mergeFileName').textContent = (file && file.name) ? file.name : '—';
+        document.getElementById('mergeFileSize').textContent = (file && file.size_mb != null) ? (file.size_mb + ' MB') : '—';
+        document.getElementById('mergeFileTime').textContent = (file && file.mtime) ? file.mtime : '—';
+
+        const viewBtn = document.getElementById('mergeViewBtn');
+        const dlBtn = document.getElementById('mergeDownloadBtn');
+        viewBtn.href = (file && file.view_url) ? file.view_url : '#';
+        dlBtn.href = (file && file.download_url) ? file.download_url : '#';
+
+        modal.classList.add('wf-modal--open');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeMergeModal(){
+        const modal = document.getElementById('mergeResultModal');
+        if (!modal) return;
+        modal.classList.remove('wf-modal--open');
+        modal.setAttribute('aria-hidden', 'true');
+        window.location.reload();
+      }
+
+      document.addEventListener('click', (e) => {
+        if (e.target && e.target.closest('#mergeResultModal [data-close]')) {
+          closeMergeModal();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeMergeModal();
+      });
+
       if (btnBack) {
         btnBack.addEventListener("click", function () {
           if (window.history.length > 1) {
@@ -650,58 +537,281 @@
         });
       }
 
-      // Merge button functionality
       if (btnMerge) {
         btnMerge.addEventListener("click", async function () {
-          // Disable button and show processing status
+
           btnMerge.disabled = true;
           btnMerge.innerHTML = "⏳ ĐANG GỘP...";
           btnMerge.style.background = "linear-gradient(135deg, #718096, #4a5568)";
-          
-          showStatus("ĐANG XỬ LÝ GỘP DỮ LIỆU...", "processing");
+
+          showStatus("ĐANG XỬ LÝ GỘP DỮ LIỆU... VUI LÒNG CHỜ", "processing", mergeStatusEl);
 
           try {
-            const response = await fetch("{% url 'weather:merge_data' %}", {
+            const res = await fetch("{% url 'weather:merge_data' %}", {
               method: "POST",
               headers: {
                 "X-CSRFToken": getCookie("csrftoken"),
-                "Content-Type": "application/json"
+                "X-Requested-With": "XMLHttpRequest"
               }
             });
 
-            const data = await response.json();
+            const data = await res.json();
 
             if (data.success) {
-              showStatus(data.message || "✅ GỘP DỮ LIỆU THÀNH CÔNG!", "success");
-              // Reload page after 2 seconds to show updated data
-              setTimeout(() => {
-                window.location.reload();
-              }, 2000);
+              showStatus(data.message || "✅ GỘP DỮ LIỆU THÀNH CÔNG!", "success", mergeStatusEl);
+
+              if (data.latest_merged) {
+                openMergeModal(data.latest_merged, data.message);
+              } else {
+                setTimeout(() => window.location.reload(), 1200);
+              }
+
             } else {
-              showStatus("❌ " + (data.message || "CÓ LỖI XẢY RA KHI GỘP DỮ LIỆU"), "error");
+              showStatus("❌ " + (data.message || "CÓ LỖI XẢY RA KHI GỘP DỮ LIỆU"), "error", mergeStatusEl);
+
+              if (data.latest_merged) {
+                openMergeModal(data.latest_merged, data.message);
+              }
+
               btnMerge.disabled = false;
               btnMerge.innerHTML = "🔗 GỘP DỮ LIỆU";
               btnMerge.style.background = "linear-gradient(135deg, #9f7aea, #805ad5)";
             }
-          } catch (error) {
-            showStatus("❌ LỖI KẾT NỐI: " + error.message, "error");
+
+          } catch (err) {
+            showStatus("❌ LỖI KẾT NỐI: " + err.message, "error", mergeStatusEl);
             btnMerge.disabled = false;
             btnMerge.innerHTML = "🔗 GỘP DỮ LIỆU";
             btnMerge.style.background = "linear-gradient(135deg, #9f7aea, #805ad5)";
+          } finally {
+            btnMerge.disabled = false;
           }
         });
       }
 
-      function showStatus(message, type) {
-        if (!statusEl) return;
+      const CLEAN_LIST_URL = "{% url 'weather:clean_list' %}";
+      const CLEAN_START_URL = "{% url 'weather:clean_data' %}";
+      const CLEAN_TAIL_URL = "{% url 'weather:clean_tail' %}";
+
+      const cwOverlay = document.getElementById("cwOverlay");
+      const cwClose = document.getElementById("cwClose");
+      const cwStep1 = document.getElementById("cwStep1");
+      const cwStep2 = document.getElementById("cwStep2");
+      const cwStep3 = document.getElementById("cwStep3");
+
+      const cwSourceLabel = document.getElementById("cwSourceLabel");
+      const cwSearch = document.getElementById("cwSearch");
+      const cwBack = document.getElementById("cwBack");
+      const cwFileList = document.getElementById("cwFileList");
+      const cwStart = document.getElementById("cwStart");
+
+      const cwBarFill = document.getElementById("cwBarFill");
+      const cwStepText = document.getElementById("cwStepText");
+      const cwPct = document.getElementById("cwPct");
+      const cwLog = document.getElementById("cwLog");
+      const cwReport = document.getElementById("cwReport");
+      const cwViewBtn = document.getElementById("cwViewBtn");
+      const cwDownloadBtn = document.getElementById("cwDownloadBtn");
+      const cwDone = document.getElementById("cwDone");
+
+      let cwSource = null;
+      let cwFiles = [];
+      let cwSelected = null;
+      let cwJobId = null;
+      let cwSince = 0;
+      let cwTimer = null;
+
+      function cwShowStep(n){
+        cwStep1.style.display = (n===1) ? "" : "none";
+        cwStep2.style.display = (n===2) ? "" : "none";
+        cwStep3.style.display = (n===3) ? "" : "none";
+      }
+
+      function cwOpen(){
+        cwOverlay.style.display = "";
+        cwShowStep(1);
+        cwSource = null;
+        cwFiles = [];
+        cwSelected = null;
+        cwFileList.innerHTML = "";
+        cwStart.disabled = true;
+        cwLog.textContent = "";
+        cwReport.style.display = "none";
+        cwViewBtn.style.display = "none";
+        cwDownloadBtn.style.display = "none";
+        cwDone.style.display = "none";
+        if (cwTimer) clearInterval(cwTimer);
+        cwTimer = null;
+      }
+
+      function cwCloseModal(){
+        cwOverlay.style.display = "none";
+        if (cwTimer) clearInterval(cwTimer);
+        cwTimer = null;
+      }
+
+      if (btnClean) btnClean.addEventListener("click", cwOpen);
+      cwClose.addEventListener("click", cwCloseModal);
+      cwOverlay.addEventListener("click", (e) => { if (e.target === cwOverlay) cwCloseModal(); });
+
+      function cwRender(list){
+        cwFileList.innerHTML = "";
+        if (!list.length){
+          cwFileList.innerHTML = `<div class="cw-empty">📭 Không có file trong thư mục này.</div>`;
+          return;
+        }
+        list.forEach((f) => {
+          const row = document.createElement("label");
+          row.className = "cw-file";
+          row.innerHTML = `
+            <input type="radio" name="cwFile" value="${f.name}">
+            <div class="cw-file__main">
+              <div class="cw-file__name">${f.name}</div>
+              <div class="cw-file__meta">📦 ${f.size_mb} MB • 🕐 ${f.mtime}</div>
+            </div>
+            <div class="cw-file__ext">${(f.ext || "").replace(".","").toUpperCase()}</div>
+          `;
+          row.querySelector("input").addEventListener("change", () => {
+            cwSelected = f.name;
+            cwStart.disabled = false;
+          });
+          cwFileList.appendChild(row);
+        });
+      }
+
+      async function cwLoadList(source){
+        cwSource = source;
+        cwSelected = null;
+        cwStart.disabled = true;
+
+        cwSourceLabel.textContent = "Nguồn: " + (source === "merge" ? "Merge_data (đã gộp)" : "output (chưa gộp)");
+        cwShowStep(2);
+        cwFileList.innerHTML = `<div class="cw-empty">⏳ Đang tải danh sách file…</div>`;
+
+        const res = await fetch(`${CLEAN_LIST_URL}?source=${encodeURIComponent(source)}`);
+        const data = await res.json();
+        if (!data.ok){
+          cwFileList.innerHTML = `<div class="cw-empty">❌ ${data.message || "Lỗi tải danh sách"}</div>`;
+          return;
+        }
+        cwFiles = data.files || [];
+        cwRender(cwFiles);
+      }
+
+      cwStep1.querySelectorAll(".cw-choice").forEach(btn => {
+        btn.addEventListener("click", () => cwLoadList(btn.dataset.source));
+      });
+
+      cwBack.addEventListener("click", () => cwShowStep(1));
+
+      cwSearch.addEventListener("input", () => {
+        const q = (cwSearch.value || "").toLowerCase().trim();
+        const filtered = cwFiles.filter(x => x.name.toLowerCase().includes(q));
+        cwRender(filtered);
+      });
+
+      cwStart.addEventListener("click", async () => {
+        if (!cwSource || !cwSelected) return;
+
+        cwShowStep(3);
+        cwBarFill.style.width = "0%";
+        cwStepText.textContent = "Đang khởi tạo…";
+        cwPct.textContent = "0%";
+        cwLog.textContent = "";
+        cwReport.style.display = "none";
+        cwViewBtn.style.display = "none";
+        cwDownloadBtn.style.display = "none";
+        cwDone.style.display = "none";
+
+        const res = await fetch(CLEAN_START_URL, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ source: cwSource, filename: cwSelected })
+        });
+
+        const data = await res.json();
+        if (!data.ok){
+          cwLog.textContent = "❌ " + (data.message || "Không start được job");
+          cwDone.style.display = "";
+          return;
+        }
+
+        cwJobId = data.job_id;
+        cwSince = 0;
+
+        cwTimer = setInterval(async () => {
+          const r = await fetch(`${CLEAN_TAIL_URL}?job_id=${encodeURIComponent(cwJobId)}&since=${cwSince}`);
+          const t = await r.json();
+          if (!t.ok) return;
+
+          const p = t.progress || {pct:0, step:""};
+          cwBarFill.style.width = (p.pct || 0) + "%";
+          cwPct.textContent = (p.pct || 0) + "%";
+          cwStepText.textContent = p.step || "Đang chạy…";
+
+          const lines = t.lines || [];
+          if (lines.length){
+            cwLog.textContent += (cwLog.textContent ? "\n" : "") + lines.join("\n");
+            cwLog.scrollTop = cwLog.scrollHeight;
+            cwSince = t.next_since || cwSince;
+          }
+
+          if (t.done){
+            clearInterval(cwTimer);
+            cwTimer = null;
+
+            if (t.error){
+              cwLog.textContent += "\n\n❌ " + t.error;
+              cwDone.style.display = "";
+              return;
+            }
+
+            const rsl = t.result || {};
+            const rep = rsl.report || {};
+
+            cwReport.style.display = "";
+            cwReport.innerHTML = `
+              <div class="cw-rgrid">
+                <div class="cw-ritem"><div class="cw-rl">Input</div><div class="cw-rv">${rsl.input_file || "-"}</div></div>
+                <div class="cw-ritem"><div class="cw-rl">Output</div><div class="cw-rv">${rsl.output_file || "-"}</div></div>
+                <div class="cw-ritem"><div class="cw-rl">Rows</div><div class="cw-rv">${rep.rows_before || 0} → ${rep.rows_after || 0}</div></div>
+                <div class="cw-ritem"><div class="cw-rl">Missing</div><div class="cw-rv">${rep.missing_before || 0} → ${rep.missing_after || 0}</div></div>
+                <div class="cw-ritem"><div class="cw-rl">Dup removed</div><div class="cw-rv">${rep.duplicates_removed || 0}</div></div>
+                <div class="cw-ritem"><div class="cw-rl">Size</div><div class="cw-rv">${rsl.size_mb || "-"} MB</div></div>
+              </div>
+            `;
+
+            if (rsl.view_url){
+              cwViewBtn.href = rsl.view_url;
+              cwViewBtn.style.display = "";
+            }
+            if (rsl.download_url){
+              cwDownloadBtn.href = rsl.download_url;
+              cwDownloadBtn.style.display = "";
+            }
+            cwDone.style.display = "";
+          }
+        }, 800);
+      });
+
+      cwDone.addEventListener("click", () => {
+        cwCloseModal();
+        window.location.reload();
+      });
+
+
+      function showStatus(message, type, element) {
+        if (!element) return;
         
-        statusEl.textContent = message;
-        statusEl.className = "merge-status show " + type;
+        element.textContent = message;
+        element.className = "merge-status show " + type;
         
-        // Auto-hide after 5 seconds for non-processing messages
         if (type !== "processing") {
           setTimeout(() => {
-            statusEl.classList.remove("show");
+            element.classList.remove("show");
           }, 5000);
         }
       }
@@ -723,4 +833,10 @@
     });
   </script>
 </body>
+<div class="wx-layer wx-clouds" aria-hidden="true"></div>
+<div class="wx-layer wind-layer" aria-hidden="true"></div>
+<div class="wx-layer wx-rain" aria-hidden="true"></div>
+<div class="wx-layer wx-lightning" aria-hidden="true"></div>
+<div class="wx-layer wx-lightning" aria-hidden="true"></div>
+
 </html>

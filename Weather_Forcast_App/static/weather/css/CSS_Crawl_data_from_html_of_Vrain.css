@@ -522,3 +522,257 @@ body.page {
   text-align: left !important;
   align-self: flex-start !important;
 }
+/* ======================
+   WEATHER FX (Gió + Mây + Mưa + Sét)
+====================== */
+
+/* đảm bảo nội dung nằm trên hiệu ứng */
+.datasets-wrap, .datasets-card {
+  position: relative;
+  z-index: 2;
+}
+
+/* base layer */
+.wx-layer{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ===== MÂY TRÔI ===== */
+.wx-clouds{
+  opacity: .14;
+  filter: blur(18px) saturate(1.05);
+  mix-blend-mode: screen;
+}
+.wx-clouds::before{
+  content:"";
+  position:absolute;
+  inset:-35% -35%;
+  background:
+    radial-gradient(closest-side at 18% 32%, rgba(120,220,255,.22), transparent 70%),
+    radial-gradient(closest-side at 48% 18%, rgba(170,120,255,.20), transparent 68%),
+    radial-gradient(closest-side at 78% 38%, rgba(120,255,210,.16), transparent 70%),
+    radial-gradient(closest-side at 62% 70%, rgba(255,255,255,.12), transparent 72%);
+  transform: translate3d(-10%, -6%, 0);
+  animation: wxCloudDrift 46s linear infinite;
+}
+@keyframes wxCloudDrift{
+  50%  { transform: translate3d(10%, 3%, 0); }
+  100% { transform: translate3d(-10%, -6%, 0); }
+}
+
+/* ===== GIÓ (override wind-layer hiện có) ===== */
+.wind-layer{
+  opacity: .26;
+  mix-blend-mode: screen;
+  filter: blur(.35px);
+}
+.wind-layer::before,
+.wind-layer::after{
+  content:"";
+  position:absolute;
+  inset:-40% -30%;
+}
+.wind-layer::before{
+  background-image:
+    repeating-linear-gradient(115deg, rgba(160,235,255,.18) 0 2px, rgba(160,235,255,0) 2px 22px),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.10) 0 1px, rgba(255,255,255,0) 1px 26px);
+  background-size: 1100px 1100px;
+  animation: wxWindA 22s linear infinite;
+}
+.wind-layer::after{
+  background-image:
+    repeating-linear-gradient(105deg, rgba(140,255,220,.12) 0 2px, rgba(140,255,220,0) 2px 28px);
+  background-size: 1400px 1400px;
+  animation: wxWindB 16s linear infinite;
+  opacity: .8;
+}
+@keyframes wxWindA{ to { transform: translate3d(18%, 10%, 0); } }
+@keyframes wxWindB{ to { transform: translate3d(24%, 14%, 0); } }
+
+/* ===== MƯA NHẸ (drizzle) ===== */
+.wx-rain{
+  opacity: .18;
+  mix-blend-mode: screen;
+}
+.wx-rain::before{
+  content:"";
+  position:absolute;
+  inset:-40% -25%;
+  background-image:
+    repeating-linear-gradient(115deg,
+      rgba(190,230,255,.35) 0 1px,
+      rgba(190,230,255,0) 1px 10px);
+  transform: translate3d(-10%, -12%, 0);
+  animation: wxRain 1.05s linear infinite;
+}
+@keyframes wxRain{ to { transform: translate3d(10%, 26%, 0); } }
+
+/* ===== SÉT (nháy nhẹ, tần suất thấp) ===== */
+.wx-lightning{
+  opacity: 0;
+  animation: wxFlash 12s ease-in-out infinite;
+}
+.wx-lightning::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: radial-gradient(circle at 68% 24%, rgba(255,255,255,.85), rgba(255,255,255,0) 55%);
+  filter: blur(6px);
+}
+@keyframes wxFlash{
+  0%, 86%, 100% { opacity: 0; }
+  88% { opacity: .10; }
+  89% { opacity: 0; }
+  91% { opacity: .14; }
+  92% { opacity: 0; }
+}
+
+/* ===== “gió lướt” trên nút ===== */
+.pill, .pill.small, .btn{
+  position: relative;
+  overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.pill:hover, .pill.small:hover, .btn:hover{
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+.pill::after, .btn::after{
+  content:"";
+  position:absolute;
+  inset:-40% -70%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.28), transparent);
+  transform: translateX(-120%) rotate(10deg);
+  transition: transform .7s ease;
+}
+.pill:hover::after, .btn:hover::after{
+  transform: translateX(120%) rotate(10deg);
+}
+
+/* ===== tôn trọng reduce-motion ===== */
+@media (prefers-reduced-motion: reduce){
+  .wx-layer::before, .wx-layer::after, .wx-layer,
+  .pill::after, .btn::after{
+    animation: none !important;
+    transition: none !important;
+  }
+}
+/* ===== SÉT VÀNG + TIA TIA (thỉnh thoảng) ===== */
+.wx-lightning{
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ánh chớp toàn màn + tia tia nhỏ */
+.wx-lightning::before{
+  content:"";
+  position:absolute;
+  inset:0;
+
+  /* flash vàng + vài đốm tia */
+  background:
+    radial-gradient(circle at 70% 22%, rgba(255,220,120,.55), rgba(255,220,120,0) 55%),
+    radial-gradient(circle at 62% 28%, rgba(255,240,200,.18), rgba(255,240,200,0) 35%),
+    radial-gradient(circle at 76% 30%, rgba(255,240,200,.16), rgba(255,240,200,0) 38%),
+
+    /* "tia tia" nhỏ (spark dots) */
+    radial-gradient(circle at 72% 34%, rgba(255,220,120,.55) 0 2px, transparent 3px),
+    radial-gradient(circle at 68% 40%, rgba(255,220,120,.45) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 77% 42%, rgba(255,220,120,.40) 0 1.8px, transparent 3px),
+    radial-gradient(circle at 64% 36%, rgba(255,220,120,.35) 0 1.2px, transparent 3px),
+    radial-gradient(circle at 80% 36%, rgba(255,220,120,.35) 0 1.2px, transparent 3px);
+
+  filter: blur(6px);
+  opacity: 0;
+
+  /* lâu lâu mới chớp */
+  animation: wxFlashGold 22s ease-in-out infinite;
+}
+
+/* tia sét chính (zigzag) */
+.wx-lightning::after{
+  content:"";
+  position:absolute;
+  top: -8%;
+  left: 70%;
+  width: 160px;
+  height: 70vh;
+
+  /* màu vàng sáng */
+  background: linear-gradient(
+    to bottom,
+    rgba(255,235,160,0) 0%,
+    rgba(255,235,160,.95) 22%,
+    rgba(255,210,90,.95) 55%,
+    rgba(255,235,160,.10) 100%
+  );
+
+  /* tạo hình tia sét */
+  clip-path: polygon(
+    48% 0%,
+    62% 10%,
+    52% 18%,
+    66% 30%,
+    45% 38%,
+    58% 52%,
+    40% 60%,
+    52% 72%,
+    34% 82%,
+    46% 100%,
+    28% 86%,
+    40% 70%,
+    26% 58%,
+    42% 46%,
+    30% 34%,
+    46% 22%,
+    36% 12%
+  );
+
+  opacity: 0;
+  transform-origin: top center;
+  transform: translateX(0) rotate(-6deg) scaleY(1);
+
+  /* glow vàng vàng */
+  filter:
+    drop-shadow(0 0 10px rgba(255,220,120,.9))
+    drop-shadow(0 0 22px rgba(255,200,80,.55));
+
+  animation: wxBoltGold 22s steps(1, end) infinite;
+}
+
+/* Flash: 80% thời gian tắt, 1 cụm nháy nhanh ở cuối chu kỳ */
+@keyframes wxFlashGold{
+  0%, 84%, 100% { opacity: 0; }
+  86% { opacity: .10; }
+  87% { opacity: 0; }
+  88% { opacity: .18; }
+  89% { opacity: 0; }
+  90% { opacity: .14; }
+  91% { opacity: 0; }
+}
+
+/* Bolt: xuất hiện cùng lúc flash + rung nhẹ */
+@keyframes wxBoltGold{
+  0%, 85%, 100% { opacity: 0; transform: translateX(0) rotate(-6deg) scaleY(1); }
+
+  86% { opacity: .85; transform: translateX(-6px) rotate(-7deg) scaleY(1.02); }
+  87% { opacity: 0; }
+
+  88% { opacity: .95; transform: translateX(8px) rotate(-4deg) scaleY(1.03); }
+  89% { opacity: 0; }
+
+  90% { opacity: .75; transform: translateX(-3px) rotate(-6deg) scaleY(1.01); }
+  91% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .wx-lightning::before,
+  .wx-lightning::after{
+    animation: none !important;
+  }
+}

@@ -1,123 +1,80 @@
-"""
-View xử lý gộp dữ liệu từ các file Excel trong thư mục output
-vào file merged_weather_data.xlsx trong thư mục Merge_data
-"""
-
+import os
 import subprocess
-import json
 from pathlib import Path
+from datetime import datetime
+
 from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 
 
-@require_http_methods(["POST"])
+def _latest_file_info(dir_path: str):
+    p = Path(dir_path)
+    if not p.exists():
+        return None
+
+    files = [
+        f for f in p.iterdir()
+        if f.is_file() and f.suffix.lower() in {".csv", ".xlsx"}
+    ]
+    if not files:
+        return None
+
+    latest = max(files, key=lambda x: x.stat().st_mtime)
+    st = latest.stat()
+    return {
+        "name": latest.name,
+        "size_mb": round(st.st_size / (1024 * 1024), 2),
+        "mtime": datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
+    }
+
+
 @csrf_exempt
 def merge_data_view(request):
-    """
-    View xử lý merge dữ liệu từ các file .xlsx trong thư mục output
-    bằng cách chạy script Merge_xlsx.py
-    """
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Method not allowed."}, status=405)
+
     try:
-        # Đường dẫn tới script Merge_xlsx.py
-        script_path = Path(r"D:\PROJRCT_WEATHER_FORCAST\Weather_Forcast_App\scripts\Merge_xlsx.py")
-        
-        # Kiểm tra script có tồn tại không
-        if not script_path.exists():
-            return JsonResponse({
-                "success": False,
-                "message": f"Không tìm thấy file Merge_xlsx.py tại: {script_path}"
-            }, status=404)
-        
-        # Xác định base_dir (thư mục cha của script_path, tức là thư mục Weather_Forcast_App)
-        # Vì script_path nằm trong thư mục scripts, nên parent.parent là thư mục Weather_Forcast_App
-        base_dir = script_path.parent.parent
-        
-        # Kiểm tra thư mục output có tồn tại không
-        output_dir = base_dir / "output"
-        if not output_dir.exists():
-            return JsonResponse({
-                "success": False,
-                "message": f"Không tìm thấy thư mục output tại: {output_dir}"
-            }, status=404)
-        
-        # Tạo thư mục Merge_data nếu chưa có
-        merge_dir = base_dir / "Merge_data"
-        merge_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Chạy script Merge_xlsx.py
-        # Thiết lập environment variables để xử lý Unicode
-        import os
-        env = os.environ.copy()
-        env['PYTHONIOENCODING'] = 'utf-8'
-        
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        script_path = os.path.join(BASE_DIR, "scripts", "merge_data.py")
+        output_dir = os.path.join(BASE_DIR, "output")
+        merge_dir = os.path.join(BASE_DIR, "Merge_data")  # <<< QUAN TRỌNG
+
+        before_files = set(os.listdir(output_dir)) if os.path.exists(output_dir) else set()
+
         result = subprocess.run(
-            ["python", str(script_path)],
+            ["python", script_path],
             capture_output=True,
             text=True,
-            timeout=300,  # Timeout 5 phút
-            cwd=str(base_dir),  # Chạy từ thư mục gốc (chứa output và Merge_data)
-            env=env,  # Thêm environment để xử lý UTF-8
-            encoding='utf-8',  # Đảm bảo output được decode đúng
-            errors='replace'  # Thay thế ký tự lỗi thay vì crash
+            check=False
         )
-        
-        # Kiểm tra kết quả
-        if result.returncode == 0:
-            # Đọc output để lấy thông tin chi tiết
-            output_lines = result.stdout.strip().split('\n')
-            
-            # Tìm thông tin về số file đã merge
-            new_files_count = 0
-            total_rows = 0
-            
-            for line in output_lines:
-                if "So file moi chua merge:" in line:
-                    try:
-                        new_files_count = int(line.split(":")[-1].strip())
-                    except:
-                        pass
-                elif "Tong so dong sau khi merge:" in line:
-                    try:
-                        total_rows = int(line.split(":")[-1].strip())
-                    except:
-                        pass
-            
-            # Tạo thông báo chi tiết
-            if new_files_count > 0:
-                message = f"✅ Đã gộp thành công {new_files_count} file mới! Tổng: {total_rows} dòng dữ liệu."
-            else:
-                message = "ℹ️ Không có file mới để gộp. Tất cả dữ liệu đã được merge trước đó."
-            
-            return JsonResponse({
-                "success": True,
-                "message": message,
-                "details": {
-                    "new_files": new_files_count,
-                    "total_rows": total_rows,
-                    "output": result.stdout
-                }
-            })
-        else:
-            # Lỗi khi chạy script
-            error_message = result.stderr if result.stderr else "Lỗi không xác định"
+
+        after_files = set(os.listdir(output_dir)) if os.path.exists(output_dir) else set()
+        new_files_count = len(after_files - before_files)
+
+        # Lấy file merged mới nhất trong Merge_data
+        latest_merged = _latest_file_info(merge_dir)
+        if latest_merged:
+            folder_key = "merged"
+            latest_merged["folder"] = folder_key
+            latest_merged["view_url"] = reverse("weather:dataset_view", args=[folder_key, latest_merged["name"]])
+            latest_merged["download_url"] = reverse("weather:dataset_download", args=[folder_key, latest_merged["name"]])
+
+        if result.returncode != 0:
             return JsonResponse({
                 "success": False,
-                "message": f"Lỗi khi gộp dữ liệu: {error_message}",
-                "details": {
-                    "stdout": result.stdout,
-                    "stderr": result.stderr
-                }
-            }, status=500)
-            
-    except subprocess.TimeoutExpired:
+                "message": "Gộp dữ liệu thất bại!",
+                "stderr": result.stderr,
+                "new_files_count": new_files_count,
+                "latest_merged": latest_merged
+            })
+
         return JsonResponse({
-            "success": False,
-            "message": "⏱️ Quá trình gộp dữ liệu mất quá nhiều thời gian (timeout 5 phút)"
-        }, status=408)
-        
+            "success": True,
+            "message": "Gộp dữ liệu thành công!",
+            "new_files_count": new_files_count,
+            "latest_merged": latest_merged
+        })
+
     except Exception as e:
-        return JsonResponse({
-            "success": False,
-            "message": f"❌ Lỗi hệ thống: {str(e)}"
-        }, status=500)
+        return JsonResponse({"success": False, "message": f"Lỗi: {str(e)}"})

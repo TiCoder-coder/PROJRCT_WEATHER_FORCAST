@@ -5,7 +5,6 @@ from datetime import datetime
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# Fix encoding cho Windows console
 if sys.platform == 'win32':
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -21,10 +20,6 @@ LOG_VIETNAM_FILENAME = "merged_vietnam_files_log.txt"
 
 
 def load_processed_files(log_path: Path) -> set[str]:
-    """
-    Đọc danh sách các file .xlsx đã được merge trước đó
-    từ file log (mỗi dòng = 1 tên file).
-    """
     if not log_path.exists():
         return set()
 
@@ -41,10 +36,6 @@ def load_processed_files(log_path: Path) -> set[str]:
 
 
 def save_processed_files(log_path: Path, processed_files: set[str]) -> None:
-    """
-    Ghi lại danh sách các file đã merge vào log file.
-    Mỗi dòng = 1 tên file .xlsx.
-    """
     try:
         with log_path.open("w", encoding="utf-8") as f:
             for name in sorted(processed_files):

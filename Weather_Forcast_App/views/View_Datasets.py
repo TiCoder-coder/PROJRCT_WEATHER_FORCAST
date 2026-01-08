@@ -7,7 +7,8 @@ from django.conf import settings
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import render
 from django.utils.html import escape
-
+from datetime import datetime
+from django.utils import timezone as dj_tz
 
 def _base_dir() -> Path:
     """
@@ -31,9 +32,33 @@ def _output_dir() -> Path:
     return _base_dir() / "output"
 
 
-def _merge_dir() -> Path:
+def _merged_dir() -> Path:
     """Trả về thư mục Merge_data"""
     return _base_dir() / "Merge_data"
+
+
+def _cleaned_dir() -> Path:
+    """Trả về thư mục cleaned_data"""
+    return _base_dir() / "cleaned_data"
+def _cleaned_merge_dir():
+    return _cleaned_dir() / "Clean_Data_For_File_Merge"
+def _cleaned_not_merge_dir() -> Path:
+    """cleaned_data/Clean_Data_For_File_Not_Merge"""
+    return _cleaned_dir() / "Clean_Data_For_File_Not_Merge"
+def _cleaned_raw_dir():
+    return _cleaned_dir() / "Clean_Data_For_File_Not_Merge"
+
+def _folder_to_dir(folder: str) -> Path | None:
+    key = (folder or "").strip().lower()
+
+    mapping = {
+        "output": _output_dir(),
+        "merged": _merged_dir(),
+        "cleaned": _cleaned_dir(),
+        "cleaned_merge": _cleaned_merge_dir(),
+        "cleaned_raw": _cleaned_raw_dir(),
+    }
+    return mapping.get(key)
 
 
 def _safe_join(base_dir: Path, filename: str) -> Path:
@@ -51,98 +76,94 @@ def _safe_join(base_dir: Path, filename: str) -> Path:
     
     return p
 
-
-def _get_files_info(directory: Path) -> list:
-    """
-    Lấy thông tin các file trong thư mục
-    """
-    print(f"DEBUG: Checking directory: {directory}")
-    print(f"DEBUG: Directory exists: {directory.exists()}")
-    
-    if not directory.exists():
-        print(f"DEBUG: Directory does not exist, creating: {directory}")
-        try:
-            directory.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
-            print(f"ERROR: Could not create directory: {e}")
+def _get_files_info(folder_path: Path, folder_key: str | None = None):
+    if not folder_path.exists():
         return []
-    
-    patterns = ["*.xlsx", "*.csv", "*.json", "*.txt"]
-    files = []
-    for pat in patterns:
-        found = list(directory.glob(pat))
-        print(f"DEBUG: Pattern '{pat}' found {len(found)} files")
-        files.extend(found)
-
-    files = sorted(files, key=lambda p: p.stat().st_mtime, reverse=True)
-    print(f"DEBUG: Total files found: {len(files)}")
 
     items = []
-    for p in files:
-        st = p.stat()
-        items.append({
-            "name": p.name,
-            "size_mb": round(st.st_size / (1024 * 1024), 2),
-            "mtime": datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
-        })
+    for path in folder_path.iterdir():
+        if path.is_file() and path.suffix.lower() in [".csv", ".xlsx", ".xls"]:
+            st = path.stat()
 
+            dt = datetime.fromtimestamp(st.st_mtime, tz=dj_tz.get_current_timezone())
+            mtime_str = dj_tz.localtime(dt).strftime("%Y-%m-%d %H:%M:%S")
+
+            item = {
+                "name": path.name,
+                "mtime": mtime_str,
+                "mtime_ts": st.st_mtime,
+                "size_mb": round(st.st_size / (1024 * 1024), 2),
+                "ext": path.suffix.lower(),
+                "folder": folder_key,
+            }
+            if folder_key:
+                item["folder"] = folder_key
+
+            items.append(item)
+
+    items.sort(key=lambda x: x.get("mtime_ts", 0), reverse=True)
     return items
 
 
+
+def _tag(items, folder_key: str):
+    return [dict(x, folder=folder_key) for x in items]
+
 def datasets_view(request):
-    """
-    View hiển thị danh sách file từ cả thư mục output và Merge_data
-    """
-    base = _base_dir()
-    print(f"DEBUG: BASE_DIR from settings: {settings.BASE_DIR}")
-    print(f"DEBUG: Calculated base_dir: {base}")
-    
-    output_dir = _output_dir()
-    merge_dir = _merge_dir()
-    
-    print(f"DEBUG: Output dir: {output_dir}")
-    print(f"DEBUG: Merge dir: {merge_dir}")
-    
-    output_dir.mkdir(parents=True, exist_ok=True)
-    merge_dir.mkdir(parents=True, exist_ok=True)
+    _output_dir().mkdir(parents=True, exist_ok=True)
+    _merged_dir().mkdir(parents=True, exist_ok=True)
+    cleaned_dir = _cleaned_dir()
+    cleaned_merge_dir = _cleaned_merge_dir()
+    cleaned_raw_dir = _cleaned_not_merge_dir()
 
-    print(f"\n=== Scanning OUTPUT directory ===")
-    output_items = _get_files_info(output_dir)
+
+    output_items = _get_files_info(_output_dir(), "output")
+    merged_items = _get_files_info(_merged_dir(), "merged")
+
+    cleaned_root_items  = _get_files_info(_cleaned_dir(), "cleaned")
+    cleaned_merge_items = _get_files_info(_cleaned_merge_dir(), "cleaned_merge")
+    cleaned_raw_items   = _get_files_info(_cleaned_raw_dir(), "cleaned_raw")
+
+    cleaned_items = sorted(
+        cleaned_root_items + cleaned_merge_items + cleaned_raw_items,
+        key=lambda x: x.get("mtime_ts", 0),
+        reverse=True
+    )
+
+
     latest_output = output_items[0] if output_items else None
-
-    print(f"\n=== Scanning MERGE_DATA directory ===")
-    merged_items = _get_files_info(merge_dir)
     latest_merged = merged_items[0] if merged_items else None
+    latest_cleaned = cleaned_items[0] if cleaned_items else None
 
-    print(f"\nDEBUG: Returning {len(output_items)} output files and {len(merged_items)} merged files")
+    latest_cleaned_merge = cleaned_merge_items[0] if cleaned_merge_items else None
+    latest_cleaned_raw = cleaned_raw_items[0] if cleaned_raw_items else None
 
     return render(request, "weather/Datasets.html", {
         "output_items": output_items,
-        "latest_output": latest_output,
         "merged_items": merged_items,
+        "cleaned_items": cleaned_items,
+
+        "latest_output": latest_output,
         "latest_merged": latest_merged,
+        "latest_cleaned": latest_cleaned,
+
+        "cleaned_merge_items": cleaned_merge_items,
+        "cleaned_raw_items": cleaned_raw_items,
+        "latest_cleaned_merge": latest_cleaned_merge,
+        "latest_cleaned_raw": latest_cleaned_raw,
     })
 
 
 def dataset_download_view(request, folder: str, filename: str):
-    """
-    View tải xuống file từ thư mục output hoặc Merge_data
-    folder: 'output' hoặc 'merged'
-    """
-    if folder == "output":
-        base_dir = _output_dir()
-    elif folder == "merged":
-        base_dir = _merge_dir()
-    else:
+    base_dir = _folder_to_dir(folder)
+    if not base_dir:
         raise Http404("Invalid folder")
-    
+
     p = _safe_join(base_dir, filename)
     content_type, _ = mimetypes.guess_type(str(p))
     resp = FileResponse(open(p, "rb"), content_type=content_type or "application/octet-stream")
     resp["Content-Disposition"] = f'attachment; filename="{p.name}"'
     return resp
-
-
 def _get_file_type(filename: str) -> str:
     """Xác định loại file từ extension"""
     ext = Path(filename).suffix.lower()
@@ -157,21 +178,14 @@ def _get_file_type(filename: str) -> str:
 
 
 def dataset_view_view(request, folder: str, filename: str):
-    """
-    View xem trước file từ thư mục output hoặc Merge_data
-    Sử dụng template duy nhất: dataset_preview.html
-    """
-    if folder == "output":
-        base_dir = _output_dir()
-    elif folder == "merged":
-        base_dir = _merge_dir()
-    else:
+    base_dir = _folder_to_dir(folder)
+    if not base_dir:
         raise Http404("Invalid folder")
-    
+
     p = _safe_join(base_dir, filename)
-    
-    # Xác định loại file
+
     file_type = _get_file_type(filename)
+
     
     # Kiểm tra nếu là request AJAX để lấy thêm dữ liệu (chỉ cho CSV/Excel)
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -310,3 +324,9 @@ def dataset_view_view(request, folder: str, filename: str):
                 'back_url': request.META.get('HTTP_REFERER', '/'),
             }
             return render(request, 'weather/error.html', error_context, status=500)
+        
+def _cleaned_merge_dir() -> Path:
+    return _cleaned_dir() / "Clean_Data_For_File_Merge"
+
+def _cleaned_raw_dir() -> Path:
+    return _cleaned_dir() / "Clean_Data_For_File_Not_Merge"

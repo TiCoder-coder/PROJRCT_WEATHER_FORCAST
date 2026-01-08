@@ -1471,3 +1471,97 @@ body.no-scroll {
   .cards{ grid-template-columns: 1fr; }
   #datasets .dataset-grid{ grid-template-columns: 1fr; }
 }
+
+/* =========================
+   HOME: mist + lightning
+   ========================= */
+
+/* mist */
+.weather-fx .fx-mist{
+  position:absolute;
+  inset:-10%;
+  background:
+    radial-gradient(ellipse at 30% 60%, rgba(160,255,235,.12), transparent 55%),
+    radial-gradient(ellipse at 70% 40%, rgba(120,200,255,.10), transparent 60%),
+    linear-gradient(0deg, rgba(10,20,35,.18), rgba(10,20,35,0));
+  opacity:.9;
+  filter: blur(10px);
+  animation: mist-drift 22s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+@keyframes mist-drift{
+  0%   { transform: translate3d(-1.5%, 0, 0) scale(1); }
+  50%  { transform: translate3d(1.5%, -1%, 0) scale(1.03); }
+  100% { transform: translate3d(-1.5%, 0, 0) scale(1); }
+}
+
+/* lightning layer */
+.lightning-layer{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index: 4;              /* trên overlay/wind, dưới content */
+  mix-blend-mode: screen;
+}
+
+.lightning-layer::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(ellipse at 65% 16%, rgba(255,215,90,.35), transparent 55%),
+    linear-gradient(0deg, rgba(255,230,140,.10), rgba(255,230,140,0));
+  opacity:0;
+  animation: home-flash 16s infinite;
+}
+
+/* bolts */
+.lightning-layer .bolt{
+  position:absolute;
+  top:-10%;
+  width: 240px;
+  height: 560px;
+  background: linear-gradient(180deg, rgba(255,235,160,0), rgba(255, 200, 0, 0.753), rgba(255,235,160,0));
+  filter: drop-shadow(0 0 14px rgba(255,210,90,.55));
+  opacity:0;
+  clip-path: polygon(
+    48% 0%, 60% 12%, 52% 20%, 66% 32%, 52% 40%,
+    64% 56%, 44% 66%, 56% 78%, 40% 100%, 48% 78%,
+    38% 68%, 48% 56%, 34% 42%, 48% 32%, 38% 18%
+  );
+  animation: home-bolt 16s infinite;
+}
+
+.lightning-layer .bolt.b1{ left: 16%; transform: rotate(8deg); }
+.lightning-layer .bolt.b2{ left: 70%; transform: rotate(-10deg) scale(.92); animation-delay: 7s; }
+
+/* “lâu lâu” */
+@keyframes home-flash{
+  0%, 68%, 100% { opacity:0; }
+  70%   { opacity:.14; }
+  70.25%{ opacity:0; }
+  70.6% { opacity:.22; }
+  71%   { opacity:0; }
+
+  88%   { opacity:.12; }
+  88.2% { opacity:0; }
+  88.6% { opacity:.18; }
+  89%   { opacity:0; }
+}
+
+@keyframes home-bolt{
+  0%, 68%, 100% { opacity:0; }
+  70%   { opacity:.85; }
+  70.15%{ opacity:0; }
+  70.6% { opacity:.55; }
+  71%   { opacity:0; }
+
+  88%   { opacity:.65; }
+  88.2% { opacity:0; }
+  88.6% { opacity:.45; }
+  89%   { opacity:0; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .lightning-layer, .weather-fx .fx-mist { display:none !important; }
+}

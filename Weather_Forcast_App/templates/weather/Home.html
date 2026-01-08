@@ -4,13 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Bảng điều khiển Dự báo Thời tiết</title>
-    <link rel="stylesheet" href="{% static 'weather/css/Home.css' %}?v=5821170">
+    <link rel="stylesheet" href="{% static 'weather/css/Home.css' %}?v=91999987821170">
 
 </head>
 <body class="home-page">
-
-
-    <!-- THANH ĐIỀU HƯỚNG TRÊN -->
     <header class="home-header">
         <div class="logo">
             <span class="logo-dot"></span>
@@ -20,11 +17,16 @@
             <button type="button" class="nav-pill" id="btnIntro">Giới thiệu</button>
         </nav>
     </header>
-
-    <!-- HERO -->
      
     <section class="hero">
         <div class="hero-overlay"></div>
+        <div class="weather-fx" aria-hidden="true">
+            <div class="fx-aurora"></div>
+            <div class="fx-clouds"></div>
+            <div class="fx-mist"></div>
+            <div class="fx-noise"></div>
+        </div>
+
         <div class="wind-layer" aria-hidden="true">
             <span class="wind w1"></span>
             <span class="wind w2"></span>
@@ -32,8 +34,13 @@
             <span class="wind w4"></span>
             <span class="wind w5"></span>
         </div>
+
+        <div class="lightning-layer" aria-hidden="true">
+            <span class="bolt b1"></span>
+            <span class="bolt b2"></span>
+        </div>
+
         <div class="hero-anim" aria-hidden="true">
-            <!-- MẶT TRỜI -->
             <div class="wx wx-sun">
                 <svg class="wx-svg" viewBox="0 0 120 120">
                 <g class="sun-rays">
@@ -50,7 +57,6 @@
                 </svg>
             </div>
 
-            <!-- MÂY -->
             <div class="wx wx-cloud">
                 <svg class="wx-svg" viewBox="0 0 220 140">
                 <path class="cloud-fill"
@@ -62,7 +68,6 @@
                 </svg>
             </div>
 
-            <!-- MƯA -->
             <div class="wx wx-rain">
                 <svg class="wx-svg" viewBox="0 0 240 170">
                 <path class="cloud-fill"
@@ -81,7 +86,6 @@
                 </svg>
             </div>
 
-            <!-- TRÁI ĐẤT (xoay) -->
             <div class="earth-wrap">
                 <div class="earth"></div>
                 <div class="earth-orbit"></div>
@@ -89,9 +93,7 @@
 
             </div>
 
-        <!-- BIỂU TƯỢNG THỜI TIẾT (động) -->
         <div class="hero-weather" aria-hidden="true">
-            <!-- MẶT TRỜI -->
             <div class="wx wx-sun">
             <svg class="wx-svg" viewBox="0 0 120 120">
                 <g class="sun-rays">
@@ -114,7 +116,6 @@
             </svg>
             </div>
 
-            <!-- MÂY -->
             <div class="wx wx-cloud">
             <svg class="wx-svg" viewBox="0 0 220 140">
                 <path class="cloud-shape"
@@ -125,7 +126,6 @@
             </svg>
             </div>
 
-            <!-- MƯA -->
             <div class="wx wx-rain">
             <svg class="wx-svg" viewBox="0 0 220 180">
                 <path class="cloud-shape"
@@ -173,7 +173,6 @@
 
     </section>
 
-    <!-- PHẦN TỔNG QUAN -->
     <section id="overview" class="section overview">
         <h2>Tổng quan về các pipeline</h2>
         <p class="section-desc">
@@ -222,7 +221,6 @@
         </div>
     </section>
 
-    <!-- PHẦN BỘ DỮ LIỆU -->
     <section id="datasets" class="section datasets">
         <h2>Các lần thu thập dữ liệu gần đây</h2>
 
@@ -242,13 +240,12 @@
         </div>
     </section>
 
-        <!-- ========== MODAL CHỌN CÁCH THU THẬP VRAIN ========== -->
     <div id="crawlMethodModal" class="crawl-modal">
         <div class="crawl-modal__overlay" data-close-crawl-modal></div>
 
         <div class="crawl-modal__content">
             <header class="crawl-modal__header">
-                <h2>Chọn cách thu thập dữ liệu bằng Vrain.</h2>
+                <h2>CHỌN CÁCH THU THẬP DỮ LIỆU</h2>
                 <button type="button"
                         class="crawl-modal__close"
                         data-close-crawl-modal>&times;</button>
@@ -390,7 +387,7 @@
         <span>© {{ now|default:"2025" }} Dự án Dự báo Thời tiết — Xây dựng bằng Django</span>
     </footer>
 
-<script src="{% static 'weather/js/Home.js' %}?v=96579"></script>
+<script src="{% static 'weather/js/Home.js' %}?v=1999796579"></script>
 
 <div id="introModal" class="crawl-modal" aria-hidden="true">
   <div class="crawl-modal__overlay" data-close-intro-modal></div>
