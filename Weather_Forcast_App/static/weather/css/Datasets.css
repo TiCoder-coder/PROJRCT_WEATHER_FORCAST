@@ -1413,3 +1413,166 @@ body.home-page::after{
   justify-content: flex-end;
   flex-wrap: wrap;
 }
+
+/* Nút "🧹 LÀM SẠCH DỮ LIỆU" trên trang Datasets */
+#btnClean.pill{
+  color: #061019;
+  font-weight: 900;
+
+  border: 1px solid rgba(255, 215, 90, 0.55);
+  background: linear-gradient(135deg, rgba(255, 215, 90, 0.95), rgba(34, 197, 94, 0.92));
+
+  box-shadow:
+    0 14px 34px rgba(34, 197, 94, 0.20),
+    0 10px 28px rgba(255, 215, 90, 0.16),
+    0 0 0 1px rgba(255, 215, 90, 0.12) inset;
+}
+
+#btnClean.pill:hover{
+  border-color: rgba(125, 211, 252, 0.55);
+  background: linear-gradient(135deg, rgba(125, 211, 252, 0.92), rgba(34, 197, 94, 0.92));
+  box-shadow:
+    0 18px 44px rgba(56, 189, 248, 0.22),
+    0 14px 34px rgba(34, 197, 94, 0.18);
+  transform: translateY(-1px);
+}
+
+#btnClean.pill:active{
+  transform: translateY(0);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.10) inset;
+}
+
+#btnClean.pill:focus-visible{
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(56, 189, 248, 0.25),
+    0 0 0 1px rgba(34, 197, 94, 0.20) inset;
+}
+
+#btnClean.pill:disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.45), rgba(100, 116, 139, 0.40));
+  border-color: rgba(148, 163, 184, 0.25);
+  box-shadow: none;
+}
+
+/* (Tuỳ chọn) Highlight các nút trong Clean Wizard (đang có inline style nên cần !important) */
+#cwStart.pill{
+  color: #061019 !important;
+  border: 1px solid rgba(255, 215, 90, 0.55) !important;
+  background: linear-gradient(135deg, rgba(255, 215, 90, 0.95), rgba(34, 197, 94, 0.92)) !important;
+  box-shadow:
+    0 14px 34px rgba(34, 197, 94, 0.18),
+    0 10px 28px rgba(255, 215, 90, 0.14) !important;
+}
+
+#cwViewBtn.pill{
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(56, 189, 248, 0.85)) !important;
+  border-color: rgba(34, 197, 94, 0.40) !important;
+}
+
+#cwDownloadBtn.pill.primary{
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.92), rgba(167, 139, 250, 0.85)) !important;
+  border-color: rgba(56, 189, 248, 0.40) !important;
+}
+
+
+.datasets-wrap .pill{
+  background: rgba(10, 16, 28, .55) !important;
+  color: #EAF2FF !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,.25) !important;
+  backdrop-filter: blur(10px);
+}
+
+.datasets-wrap .pill:hover{
+  border-color: rgba(56,189,248,.45) !important;
+  box-shadow:
+    0 14px 30px rgba(0,0,0,.32),
+    0 0 0 2px rgba(56,189,248,.12),
+    0 0 26px rgba(56,189,248,.18) !important;
+}
+
+.datasets-wrap .pill:active{
+  box-shadow: 0 10px 18px rgba(0,0,0,.28) !important;
+}
+
+.datasets-wrap .pill:focus-visible{
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(125,211,252,.20),
+    0 0 0 6px rgba(167,139,250,.12),
+    0 14px 30px rgba(0,0,0,.32) !important;
+}
+
+/* TRANG CHỦ / PRIMARY (tải / home) */
+.datasets-wrap .pill.primary{
+  background: linear-gradient(135deg, #38BDF8, #A78BFA) !important;
+  color: #071018 !important;
+  border-color: rgba(255,255,255,.10) !important;
+  box-shadow:
+    0 14px 28px rgba(56,189,248,.20),
+    0 10px 22px rgba(167,139,250,.16) !important;
+}
+.datasets-wrap .pill.primary:hover{
+  box-shadow:
+    0 18px 36px rgba(56,189,248,.25),
+    0 14px 28px rgba(167,139,250,.22),
+    0 0 28px rgba(56,189,248,.22) !important;
+}
+
+/* NÚT GỘP DỮ LIỆU */
+.datasets-wrap .pill.merge{
+  background: linear-gradient(135deg, #A78BFA, #34D399) !important;
+  color: #06120E !important;
+  border-color: rgba(255,255,255,.10) !important;
+  box-shadow:
+    0 14px 28px rgba(167,139,250,.18),
+    0 10px 22px rgba(52,211,153,.14) !important;
+}
+
+/* NÚT LÀM SẠCH DỮ LIỆU */
+.datasets-wrap #btnClean.pill{
+  background: linear-gradient(135deg, #FB7185, #FBBF24) !important;
+  color: #1a1207 !important;
+  border-color: rgba(255,255,255,.10) !important;
+  box-shadow:
+    0 14px 28px rgba(251,113,133,.18),
+    0 10px 22px rgba(251,191,36,.14) !important;
+}
+.datasets-wrap #btnClean.pill:hover{
+  box-shadow:
+    0 18px 36px rgba(251,113,133,.22),
+    0 14px 28px rgba(251,191,36,.18),
+    0 0 30px rgba(251,191,36,.18) !important;
+}
+
+/* NÚT QUAY LẠI (datasets) */
+.datasets-wrap #btnBack.pill{
+  background: linear-gradient(135deg, rgba(15,23,42,.85), rgba(30,41,59,.65)) !important;
+  color: #EAF2FF !important;
+  border-color: rgba(148,163,184,.22) !important;
+}
+
+/* NÚT XEM (pill small nhưng KHÔNG primary) */
+.datasets-wrap .op-actions .pill.small:not(.primary){
+  background: linear-gradient(135deg, #34D399, #22C55E) !important;
+  color: #07130E !important;
+  border-color: rgba(255,255,255,.10) !important;
+  box-shadow:
+    0 12px 24px rgba(34,197,94,.14),
+    0 10px 22px rgba(0,0,0,.20) !important;
+}
+
+/* NÚT TẢI (pill small + primary) */
+.datasets-wrap .op-actions .pill.small.primary{
+  background: linear-gradient(135deg, #60A5FA, #38BDF8) !important;
+  color: #061017 !important;
+  border-color: rgba(255,255,255,.10) !important;
+  box-shadow:
+    0 14px 28px rgba(56,189,248,.16),
+    0 10px 22px rgba(0,0,0,.20) !important;
+}

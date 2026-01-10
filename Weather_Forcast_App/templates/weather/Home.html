@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Bảng điều khiển Dự báo Thời tiết</title>
-    <link rel="stylesheet" href="{% static 'weather/css/Home.css' %}?v=988886261994999987821170">
+    <link rel="stylesheet" href="{% static 'weather/css/Home.css' %}?v=98889986261994999987821170">
 
 </head>
 <body class="home-page">
@@ -395,7 +395,7 @@
     <header class="crawl-modal__header intro-x__header">
       <div class="intro-x__head">
         <div class="intro-x__badge">🌦️ VN Weather Hub</div>
-        <h2 id="introTitle">Giới thiệu & cách dùng nhanh</h2>
+        <h2 id="introTitle">GIỚI THIỆU VÀ CÁCH SỬ DỤNG NHANH</h2>
         <p class="crawl-modal__subtitle intro-x__subtitle">
           Hệ thống Django thu thập → gộp (merge) → làm sạch (clean) → xem trước / tải về dataset thời tiết (CSV/XLSX/JSON/TXT) từ nhiều nguồn.
         </p>
@@ -468,29 +468,6 @@
           <li>Nếu muốn dữ liệu “chuẩn phân tích”: bấm <b>🔗 Gộp</b> rồi <b>🧹 Làm sạch</b>.</li>
         </ol>
       </section>
-
-      <!-- Card: Tips/Troubleshoot -->
-      <section class="intro-x__card intro-x__card--wide">
-        <h3>🧯 Tips & xử lý lỗi nhanh</h3>
-        <div class="intro-x__cols">
-          <div>
-            <h4 class="intro-x__mini">Không thấy file mới?</h4>
-            <ul class="intro-x__list">
-              <li>Kiểm tra đúng thư mục: <code>output/</code>, <code>Merge_data/</code>, <code>cleaned_data/...</code></li>
-              <li>Refresh trang <b>Bộ dữ liệu</b> để cập nhật danh sách.</li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="intro-x__mini">Logs không hiện / chạy lâu?</h4>
-            <ul class="intro-x__list">
-              <li>Kiểm tra script có <code>print</code> + flush log không.</li>
-              <li>Với Selenium: đảm bảo driver/chrome đúng phiên bản.</li>
-            </ul>
-          </div>
-        </div>
-        <div class="intro-x__note">⌨️ Mẹo: bấm <b>ESC</b> để đóng modal.</div>
-      </section>
-    </div>
 
     <div class="intro-x__actions">
       <button type="button" class="btn primary" id="introStartCrawl">🚀 Bắt đầu thu thập</button>

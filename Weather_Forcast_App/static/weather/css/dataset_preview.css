@@ -477,3 +477,175 @@ body::after{
   inset:0;
   z-index:1;
 }
+/* ===========================
+   FIX: Load more + Pagination bị lệch
+   (Dán CUỐI file dataset_preview.css)
+   =========================== */
+
+/* Wrapper dưới bảng: căn giữa toàn bộ cụm */
+#loadMoreContainer{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Text "Đang tải thêm dữ liệu..." */
+#loading{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(226, 232, 240, 0.9);
+  opacity: .95;
+}
+
+/* Nút tải thêm: đảm bảo đứng giữa */
+#loadMoreBtn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto;
+}
+
+/* Pagination container */
+#pagination,
+.pagination{
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 6px 0 2px;
+  text-align: center;
+}
+
+/* Nút trang */
+#pagination .page-btn,
+.pagination .page-btn{
+  appearance: none;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(2, 6, 23, 0.45);
+  color: rgba(226, 232, 240, 0.95);
+  font-weight: 800;
+
+  min-width: 34px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 10px;
+
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+
+#pagination .page-btn:hover,
+.pagination .page-btn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(96, 165, 250, 0.55);
+  background: rgba(30, 64, 175, 0.20);
+}
+
+#pagination .page-btn:active,
+.pagination .page-btn:active{
+  transform: translateY(0);
+}
+
+/* Trang hiện tại (JS đang add class "active") */
+#pagination .page-btn.active,
+.pagination .page-btn.active{
+  border-color: rgba(34, 197, 94, 0.65);
+  background: rgba(22, 163, 74, 0.18);
+  color: #eafff3;
+}
+
+/* Disabled */
+#pagination .page-btn[disabled],
+.pagination .page-btn[disabled]{
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Cụm nút cuối: Quay lại + Tải toàn bộ */
+.action-buttons{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* 2 nút cuối: Quay lại / Tải toàn bộ */
+.action-buttons .back-btn{
+  background: rgba(10, 16, 28, .55) !important;
+  color: #EAF2FF !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,.25) !important;
+  backdrop-filter: blur(10px);
+  transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.action-buttons .back-btn:hover{
+  border-color: rgba(56,189,248,.45) !important;
+  box-shadow:
+    0 14px 30px rgba(0,0,0,.32),
+    0 0 0 2px rgba(56,189,248,.12),
+    0 0 26px rgba(56,189,248,.18) !important;
+}
+
+/* Quay lại danh sách */
+.action-buttons .back-btn:first-child{
+  background: linear-gradient(135deg, rgba(15,23,42,.85), rgba(30,41,59,.65)) !important;
+  color: #EAF2FF !important;
+}
+
+/* Tải toàn bộ file */
+.action-buttons .back-btn:nth-child(2){
+  background: linear-gradient(135deg, #38BDF8, #A78BFA) !important;
+  color: #071018 !important;
+  border-color: rgba(255,255,255,.10) !important;
+}
+
+/* Nút "Tải thêm dữ liệu" */
+.load-more button{
+  background: linear-gradient(135deg, #34D399, #22C55E) !important;
+  color: #07130E !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: 0 12px 24px rgba(34,197,94,.14) !important;
+}
+.load-more button:hover{
+  box-shadow:
+    0 16px 32px rgba(34,197,94,.18),
+    0 0 26px rgba(34,197,94,.14) !important;
+}
+
+/* Pagination */
+.pagination a, .pagination span{
+  background: rgba(10, 16, 28, .55) !important;
+  color: #EAF2FF !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,.22) !important;
+}
+.pagination a:hover{
+  border-color: rgba(56,189,248,.45) !important;
+  box-shadow:
+    0 12px 26px rgba(0,0,0,.28),
+    0 0 0 2px rgba(56,189,248,.12) !important;
+}
+.pagination .active, .pagination .current{
+  background: linear-gradient(135deg, #60A5FA, #38BDF8) !important;
+  color: #061017 !important;
+  border-color: rgba(255,255,255,.10) !important;
+}
