@@ -405,7 +405,7 @@
         <div class="cw-top">
           <div>
             <div class="cw-title">🧼 SƠ ĐỒ LUỒNG LÀM SẠCH DỮ LIỆU</div>
-            <div class="cw-sub">Chọn nguồn → chọn file → xem tiến trình → tải kết quả</div>
+            <div class="cw-sub">Chọn nguồn → chọn file → chọn kỹ thuật → xem tiến trình → tải kết quả</div>
           </div>
           <button class="pill" id="cwClose">✕</button>
         </div>
@@ -431,6 +431,31 @@
             <button class="pill" id="cwBack">↩ QUAY LẠI</button>
           </div>
 
+          <!-- Thêm combobox chọn kỹ thuật làm sạch -->
+          <div class="cw-technique-selector" style="margin: 15px 0; padding: 15px; background: #f8fafc; border-radius: 8px;">
+            <div style="font-weight: 600; margin-bottom: 8px; color: #2d3748;">🎯 CHỌN KỸ THUẬT LÀM SẠCH:</div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <select id="cwTechnique" class="technique-select" style="flex: 1; min-width: 250px; padding: 10px 14px; border: 2px solid #4299e1; border-radius: 6px; background: white; font-size: 14px; color: #2d3748;">
+                <option value="all">✅ TẤT CẢ KỸ THUẬT (MẶC ĐỊNH)</option>
+                <option value="missing">🔍 XỬ LÝ MISSING VALUES</option>
+                <option value="duplicates">🧹 XÓA DỮ LIỆU TRÙNG LẶP</option>
+                <option value="outliers">📊 XỬ LÝ OUTLIERS</option>
+                <option value="normalize">📐 CHUẨN HÓA DỮ LIỆU</option>
+                <option value="encode">🔤 MÃ HÓA DỮ LIỆU PHÂN LOẠI</option>
+                <option value="datetime">⏰ XỬ LÝ DỮ LIỆU THỜI GIAN</option>
+              </select>
+              <div class="technique-info" style="flex: 2; padding: 10px; background: #ebf8ff; border-radius: 6px; border-left: 4px solid #4299e1;">
+                <div id="techniqueDescription" style="font-size: 13px; color: #4a5568;">
+                  <strong>✅ Tất cả kỹ thuật:</strong> Áp dụng tất cả các kỹ thuật làm sạch bao gồm xử lý missing values, duplicates, outliers, chuẩn hóa, mã hóa và thời gian.
+                </div>
+              </div>
+            </div>
+            <div style="margin-top: 10px; font-size: 12px; color: #718096; display: flex; align-items: center; gap: 5px;">
+              <span>💡</span>
+              <span>Chọn kỹ thuật phù hợp với nhu cầu phân tích dữ liệu của bạn</span>
+            </div>
+          </div>
+
           <div class="cw-filelist" id="cwFileList"></div>
 
           <div class="cw-actions">
@@ -448,6 +473,13 @@
           </div>
 
           <div class="cw-log" id="cwLog"></div>
+          
+          <!-- Thêm thông tin kỹ thuật đã chọn -->
+          <div class="cw-technique-info" style="margin: 15px 0; padding: 15px; background: #f0fff4; border-radius: 8px; border-left: 4px solid #48bb78;">
+            <div style="font-weight: 600; margin-bottom: 5px; color: #276749;">🎯 KỸ THUẬT ĐÃ CHỌN:</div>
+            <div id="selectedTechniqueDisplay" style="font-weight: 500; color: #2d3748;">—</div>
+          </div>
+          
           <div class="cw-report" id="cwReport" style="display:none;"></div>
 
           <div class="cw-actions">
@@ -483,7 +515,15 @@
 
   <script>
     <!-- CLEAN WIZARD MODAL -->
-    
+    const TECHNIQUE_DESCRIPTIONS = {
+      "all": "✅ <strong>Tất cả kỹ thuật:</strong> Áp dụng tất cả các kỹ thuật làm sạch bao gồm xử lý missing values, duplicates, outliers, chuẩn hóa, mã hóa và thời gian.",
+      "missing": "🔍 <strong>Xử lý Missing Values:</strong> Phát hiện và xử lý các giá trị thiếu bằng cách điền giá trị trung bình/trung vị hoặc xóa dòng.",
+      "duplicates": "🧹 <strong>Xóa dữ liệu trùng lặp:</strong> Tìm và loại bỏ các bản ghi trùng lặp hoàn toàn trong dataset.",
+      "outliers": "📊 <strong>Xử lý Outliers:</strong> Phát hiện và xử lý các giá trị ngoại lai bằng phương pháp IQR hoặc Z-score.",
+      "normalize": "📐 <strong>Chuẩn hóa dữ liệu:</strong> Chuẩn hóa các cột số về cùng một tỷ lệ (Min-Max hoặc Z-score).",
+      "encode": "🔤 <strong>Mã hóa dữ liệu phân loại:</strong> Chuyển đổi các biến phân loại thành dạng số (One-Hot hoặc Label Encoding).",
+      "datetime": "⏰ <strong>Xử lý dữ liệu thời gian:</strong> Tách ngày/tháng/năm/giờ từ cột thời gian và tạo các đặc trưng mới."
+    };
 
     document.addEventListener("DOMContentLoaded", function () {
       const btnBack = document.getElementById("btnBack");
@@ -491,6 +531,17 @@
       const btnClean = document.getElementById("btnClean");
       const mergeStatusEl = document.getElementById("mergeStatus");
       const cleanStatusEl = document.getElementById("cleanStatus");
+      const cwTechnique = document.getElementById("cwTechnique");
+      const techniqueDescription = document.getElementById("techniqueDescription");
+      
+      // Cập nhật mô tả kỹ thuật khi thay đổi lựa chọn
+      if (cwTechnique && techniqueDescription) {
+        cwTechnique.addEventListener("change", function() {
+          const selectedValue = this.value;
+          techniqueDescription.innerHTML = TECHNIQUE_DESCRIPTIONS[selectedValue] || TECHNIQUE_DESCRIPTIONS["all"];
+        });
+      }
+      
       function openMergeModal(file, msg){
         const modal = document.getElementById('mergeResultModal');
         if (!modal) return;
@@ -613,6 +664,7 @@
       const cwViewBtn = document.getElementById("cwViewBtn");
       const cwDownloadBtn = document.getElementById("cwDownloadBtn");
       const cwDone = document.getElementById("cwDone");
+      const selectedTechniqueDisplay = document.getElementById("selectedTechniqueDisplay");
 
       let cwSource = null;
       let cwFiles = [];
@@ -713,6 +765,12 @@
       cwStart.addEventListener("click", async () => {
         if (!cwSource || !cwSelected) return;
 
+        const technique = document.getElementById("cwTechnique").value;
+        const techniqueText = document.getElementById("cwTechnique").options[document.getElementById("cwTechnique").selectedIndex].text;
+        
+        // Hiển thị kỹ thuật đã chọn trong bước 3
+        selectedTechniqueDisplay.textContent = techniqueText;
+
         cwShowStep(3);
         cwBarFill.style.width = "0%";
         cwStepText.textContent = "Đang khởi tạo…";
@@ -729,7 +787,11 @@
             "X-CSRFToken": getCookie("csrftoken"),
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ source: cwSource, filename: cwSelected })
+          body: JSON.stringify({ 
+            source: cwSource, 
+            filename: cwSelected,
+            technique: technique // Gửi kỹ thuật đã chọn
+          })
         });
 
         const data = await res.json();
@@ -777,6 +839,7 @@
               <div class="cw-rgrid">
                 <div class="cw-ritem"><div class="cw-rl">Input</div><div class="cw-rv">${rsl.input_file || "-"}</div></div>
                 <div class="cw-ritem"><div class="cw-rl">Output</div><div class="cw-rv">${rsl.output_file || "-"}</div></div>
+                <div class="cw-ritem"><div class="cw-rl">Kỹ thuật</div><div class="cw-rv">${techniqueText}</div></div>
                 <div class="cw-ritem"><div class="cw-rl">Rows</div><div class="cw-rv">${rep.rows_before || 0} → ${rep.rows_after || 0}</div></div>
                 <div class="cw-ritem"><div class="cw-rl">Missing</div><div class="cw-rv">${rep.missing_before || 0} → ${rep.missing_after || 0}</div></div>
                 <div class="cw-ritem"><div class="cw-rl">Dup removed</div><div class="cw-rv">${rep.duplicates_removed || 0}</div></div>
