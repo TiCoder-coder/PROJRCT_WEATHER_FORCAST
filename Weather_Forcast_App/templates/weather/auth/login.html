@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng nhập - VN Weather Hub</title>
+  <link rel="stylesheet" href="{% static 'weather/css/auth.css' %}?v=1.0">
+</head>
+
+<body class="auth-page">
+  
+  <!-- Weather effects background -->
+  <div class="wx-layer wx-clouds" aria-hidden="true"></div>
+  <div class="wx-layer wind-layer" aria-hidden="true"></div>
+  <div class="wx-layer wx-rain" aria-hidden="true"></div>
+  <div class="wx-layer wx-lightning" aria-hidden="true"></div>
+  <div class="wx-lightning-2" aria-hidden="true"></div>
+  <div class="wx-thunder-flash" aria-hidden="true"></div>
+  
+  <div class="auth-container">
+    <div class="auth-card">
+      
+      <!-- Logo/Brand -->
+      <div class="auth-brand">
+        <span class="brand-dot"></span>
+        <h1 class="brand-title">VN Weather Hub</h1>
+        <p class="brand-subtitle">Hệ thống dự báo thời tiết</p>
+      </div>
+
+      <!-- Login Form -->
+      <div class="auth-form-wrap">
+        <h2 class="form-title">Đăng nhập</h2>
+        <p class="form-subtitle">Chào mừng bạn quay trở lại!</p>
+
+        <!-- Messages -->
+        {% if messages %}
+          <div class="messages-container">
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }}">
+                <span class="alert-icon">
+                  {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✕{% else %}ℹ{% endif %}
+                </span>
+                <span class="alert-text">{{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'weather:login' %}" class="auth-form">
+          {% csrf_token %}
+          
+          <div class="form-group">
+            <label for="username" class="form-label">
+              <span class="label-icon">👤</span>
+              Tên đăng nhập
+            </label>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              class="form-input"
+              placeholder="Nhập tên đăng nhập"
+              required
+              autofocus
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">
+              <span class="label-icon">🔒</span>
+              Mật khẩu
+            </label>
+            <div class="password-input-wrap">
+              <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                class="form-input"
+                placeholder="Nhập mật khẩu"
+                required
+              />
+              <button type="button" class="toggle-password" onclick="togglePassword('password')">
+                👁️
+              </button>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="checkbox-label">
+              <input type="checkbox" name="remember_me" />
+              <span class="checkbox-text">Ghi nhớ đăng nhập</span>
+            </label>
+            <a href="#" class="forgot-link">Quên mật khẩu?</a>
+          </div>
+
+          <button type="submit" class="btn-submit">
+            <span class="btn-text">Đăng nhập</span>
+            <span class="btn-icon">→</span>
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          <p class="footer-text">
+            Chưa có tài khoản? 
+            <a href="{% url 'weather:register' %}" class="footer-link">Đăng ký ngay</a>
+          </p>
+          <a href="{% url 'weather:home' %}" class="back-home">
+            ← Về trang chủ
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function togglePassword(inputId) {
+      const input = document.getElementById(inputId);
+      const button = input.nextElementSibling;
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        button.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        button.textContent = '👁️';
+      }
+    }
+
+    // Auto hide messages after 5 seconds
+    setTimeout(() => {
+      const messages = document.querySelectorAll('.alert');
+      messages.forEach(msg => {
+        msg.style.opacity = '0';
+        msg.style.transform = 'translateY(-10px)';
+        setTimeout(() => msg.remove(), 300);
+      });
+    }, 5000);
+  </script>
+
+</body>
+</html>

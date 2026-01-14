@@ -24,6 +24,12 @@ from .views.View_Clear import (
     clean_files_list_view,
     clean_data_tail_view,
 )
+from .views.View_Auth import (
+    login_view,
+    register_view,
+    logout_view,
+    profile_view,
+)
 
 app_name = "weather"
 
@@ -56,5 +62,11 @@ urlpatterns = [
     path("datasets/clean/", clean_data_view, name="clean_data"),
     path("datasets/clean/list/", clean_files_list_view, name="clean_list"),
     path("datasets/clean/tail/", clean_data_tail_view, name="clean_tail"),
+    
+    # Authentication URLs
+    path("login/", login_view, name="login"),
+    path("register/", register_view, name="register"),
+    path("logout/", logout_view, name="logout"),
+    path("profile/", profile_view, name="profile"),
 
 ]

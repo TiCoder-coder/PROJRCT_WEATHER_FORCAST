@@ -120,6 +120,12 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / "Weather_Forcast_App" / "static",
 ]
+
+# Login/Logout URLs
+LOGIN_URL = 'weather:login'
+LOGIN_REDIRECT_URL = 'weather:home'
+LOGOUT_REDIRECT_URL = 'weather:login'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

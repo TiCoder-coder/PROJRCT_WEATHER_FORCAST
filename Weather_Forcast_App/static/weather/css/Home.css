@@ -645,6 +645,49 @@ body.no-scroll {
   box-shadow: 0 10px 24px rgba(0,0,0,0.22);
 }
 
+/* Auth button styles */
+.home-nav .nav-login {
+  background: linear-gradient(135deg, rgba(66, 153, 225, 0.25), rgba(49, 130, 206, 0.15));
+  border-color: rgba(66, 153, 225, 0.35);
+  color: #90cdf4;
+  font-weight: 700;
+}
+
+.home-nav .nav-login:hover {
+  background: linear-gradient(135deg, rgba(66, 153, 225, 0.35), rgba(49, 130, 206, 0.25));
+  border-color: rgba(66, 153, 225, 0.55);
+  box-shadow: 0 0 20px rgba(66, 153, 225, 0.25), 0 10px 24px rgba(0,0,0,0.22);
+  color: #fff;
+}
+
+.home-nav .nav-register {
+  background: linear-gradient(135deg, rgba(72, 187, 120, 0.25), rgba(47, 133, 90, 0.15));
+  border-color: rgba(72, 187, 120, 0.35);
+  color: #9ae6b4;
+  font-weight: 700;
+}
+
+.home-nav .nav-register:hover {
+  background: linear-gradient(135deg, rgba(72, 187, 120, 0.35), rgba(47, 133, 90, 0.25));
+  border-color: rgba(72, 187, 120, 0.55);
+  box-shadow: 0 0 20px rgba(72, 187, 120, 0.25), 0 10px 24px rgba(0,0,0,0.22);
+  color: #fff;
+}
+
+.home-nav .nav-logout {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.15));
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  font-weight: 700;
+}
+
+.home-nav .nav-logout:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.35), rgba(220, 38, 38, 0.25));
+  border-color: rgba(239, 68, 68, 0.55);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.25), 0 10px 24px rgba(0,0,0,0.22);
+  color: #fff;
+}
+
 .intro-modal__content{
   overflow: hidden;
 }

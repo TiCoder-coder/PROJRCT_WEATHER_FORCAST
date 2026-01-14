@@ -1,0 +1,214 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng ký - VN Weather Hub</title>
+  <link rel="stylesheet" href="{% static 'weather/css/auth.css' %}?v=1.0">
+</head>
+
+<body class="auth-page">
+  
+  <!-- Weather effects background -->
+  <div class="wx-layer wx-clouds" aria-hidden="true"></div>
+  <div class="wx-layer wind-layer" aria-hidden="true"></div>
+  <div class="wx-layer wx-rain" aria-hidden="true"></div>
+  <div class="wx-layer wx-lightning" aria-hidden="true"></div>
+  <div class="wx-lightning-2" aria-hidden="true"></div>
+  <div class="wx-thunder-flash" aria-hidden="true"></div>
+  
+  <div class="auth-container">
+    <div class="auth-card register-card">
+      
+      <!-- Logo/Brand -->
+      <div class="auth-brand">
+        <span class="brand-dot"></span>
+        <h1 class="brand-title">VN Weather Hub</h1>
+        <p class="brand-subtitle">Tạo tài khoản mới</p>
+      </div>
+
+      <!-- Register Form -->
+      <div class="auth-form-wrap">
+        <h2 class="form-title">Đăng ký</h2>
+        <p class="form-subtitle">Tạo tài khoản để sử dụng đầy đủ tính năng</p>
+
+        <!-- Messages -->
+        {% if messages %}
+          <div class="messages-container">
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }}">
+                <span class="alert-icon">
+                  {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✕{% else %}ℹ{% endif %}
+                </span>
+                <span class="alert-text">{{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'weather:register' %}" class="auth-form">
+          {% csrf_token %}
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="first_name" class="form-label">
+                <span class="label-icon">📝</span>
+                Họ
+              </label>
+              <input 
+                type="text" 
+                id="first_name" 
+                name="first_name" 
+                class="form-input"
+                placeholder="Nhập họ"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="last_name" class="form-label">
+                <span class="label-icon">📝</span>
+                Tên
+              </label>
+              <input 
+                type="text" 
+                id="last_name" 
+                name="last_name" 
+                class="form-input"
+                placeholder="Nhập tên"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="username" class="form-label">
+              <span class="label-icon">👤</span>
+              Tên đăng nhập <span class="required">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              class="form-input"
+              placeholder="Nhập tên đăng nhập (tối thiểu 3 ký tự)"
+              required
+              autofocus
+              minlength="3"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="form-label">
+              <span class="label-icon">📧</span>
+              Email <span class="required">*</span>
+            </label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="form-input"
+              placeholder="Nhập địa chỉ email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">
+              <span class="label-icon">🔒</span>
+              Mật khẩu <span class="required">*</span>
+            </label>
+            <div class="password-input-wrap">
+              <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                class="form-input"
+                placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+                required
+                minlength="6"
+              />
+              <button type="button" class="toggle-password" onclick="togglePassword('password')">
+                👁️
+              </button>
+            </div>
+            <small class="form-hint">Mật khẩu phải có ít nhất 6 ký tự</small>
+          </div>
+
+          <div class="form-group">
+            <label for="confirm_password" class="form-label">
+              <span class="label-icon">🔒</span>
+              Xác nhận mật khẩu <span class="required">*</span>
+            </label>
+            <div class="password-input-wrap">
+              <input 
+                type="password" 
+                id="confirm_password" 
+                name="confirm_password" 
+                class="form-input"
+                placeholder="Nhập lại mật khẩu"
+                required
+              />
+              <button type="button" class="toggle-password" onclick="togglePassword('confirm_password')">
+                👁️
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit">
+            <span class="btn-text">Đăng ký</span>
+            <span class="btn-icon">→</span>
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          <p class="footer-text">
+            Đã có tài khoản? 
+            <a href="{% url 'weather:login' %}" class="footer-link">Đăng nhập ngay</a>
+          </p>
+          <a href="{% url 'weather:home' %}" class="back-home">
+            ← Về trang chủ
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function togglePassword(inputId) {
+      const input = document.getElementById(inputId);
+      const button = input.nextElementSibling;
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        button.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        button.textContent = '👁️';
+      }
+    }
+
+    // Auto hide messages after 5 seconds
+    setTimeout(() => {
+      const messages = document.querySelectorAll('.alert');
+      messages.forEach(msg => {
+        msg.style.opacity = '0';
+        msg.style.transform = 'translateY(-10px)';
+        setTimeout(() => msg.remove(), 300);
+      });
+    }, 5000);
+
+    // Password match validation
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    
+    confirmPassword.addEventListener('input', function() {
+      if (password.value !== confirmPassword.value) {
+        confirmPassword.setCustomValidity('Mật khẩu không khớp');
+      } else {
+        confirmPassword.setCustomValidity('');
+      }
+    });
+  </script>
+
+</body>
+</html>
