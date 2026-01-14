@@ -89,11 +89,13 @@ province_urls = [
     "https://vrain.vn/52/overview?public_map=windy",
 ]
 
-OUTPUT_DIR = Path("/PROJECT_WEATHER_FORECAST/Weather_Forcast_App/output")
+# Lấy đường dẫn thư mục script hiện tại và tìm thư mục output
+script_dir = Path(__file__).parent
+OUTPUT_DIR = script_dir.parent / "output"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-csv_path = OUTPUT_DIR / f"luong_mua_thong_ke_selenium_{timestamp}.csv"
+csv_path = OUTPUT_DIR / f"Bao_cao_mua_HTML_{timestamp}.csv"
 
 with open(csv_path, "w", newline="", encoding="utf-8-sig") as csvfile:
     # THÊM CỘT "Thời gian crawl" (có giờ, phút, giây)

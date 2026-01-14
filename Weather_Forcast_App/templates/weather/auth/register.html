@@ -2,213 +2,215 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Đăng ký - VN Weather Hub</title>
-  <link rel="stylesheet" href="{% static 'weather/css/auth.css' %}?v=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - VN Weather Hub</title>
+    <link rel="stylesheet" href="{% static 'weather/css/auth.css' %}?v=10022">
 </head>
-
 <body class="auth-page">
-  
-  <!-- Weather effects background -->
-  <div class="wx-layer wx-clouds" aria-hidden="true"></div>
-  <div class="wx-layer wind-layer" aria-hidden="true"></div>
-  <div class="wx-layer wx-rain" aria-hidden="true"></div>
-  <div class="wx-layer wx-lightning" aria-hidden="true"></div>
-  <div class="wx-lightning-2" aria-hidden="true"></div>
-  <div class="wx-thunder-flash" aria-hidden="true"></div>
-  
-  <div class="auth-container">
-    <div class="auth-card register-card">
-      
-      <!-- Logo/Brand -->
-      <div class="auth-brand">
-        <span class="brand-dot"></span>
-        <h1 class="brand-title">VN Weather Hub</h1>
-        <p class="brand-subtitle">Tạo tài khoản mới</p>
-      </div>
-
-      <!-- Register Form -->
-      <div class="auth-form-wrap">
-        <h2 class="form-title">Đăng ký</h2>
-        <p class="form-subtitle">Tạo tài khoản để sử dụng đầy đủ tính năng</p>
-
-        <!-- Messages -->
-        {% if messages %}
-          <div class="messages-container">
-            {% for message in messages %}
-              <div class="alert alert-{{ message.tags }}">
-                <span class="alert-icon">
-                  {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✕{% else %}ℹ{% endif %}
-                </span>
-                <span class="alert-text">{{ message }}</span>
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-
-        <form method="post" action="{% url 'weather:register' %}" class="auth-form">
-          {% csrf_token %}
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="first_name" class="form-label">
-                <span class="label-icon">📝</span>
-                Họ
-              </label>
-              <input 
-                type="text" 
-                id="first_name" 
-                name="first_name" 
-                class="form-input"
-                placeholder="Nhập họ"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="last_name" class="form-label">
-                <span class="label-icon">📝</span>
-                Tên
-              </label>
-              <input 
-                type="text" 
-                id="last_name" 
-                name="last_name" 
-                class="form-input"
-                placeholder="Nhập tên"
-              />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="username" class="form-label">
-              <span class="label-icon">👤</span>
-              Tên đăng nhập <span class="required">*</span>
-            </label>
-            <input 
-              type="text" 
-              id="username" 
-              name="username" 
-              class="form-input"
-              placeholder="Nhập tên đăng nhập (tối thiểu 3 ký tự)"
-              required
-              autofocus
-              minlength="3"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="email" class="form-label">
-              <span class="label-icon">📧</span>
-              Email <span class="required">*</span>
-            </label>
-            <input 
-              type="email" 
-              id="email" 
-              name="email" 
-              class="form-input"
-              placeholder="Nhập địa chỉ email"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="password" class="form-label">
-              <span class="label-icon">🔒</span>
-              Mật khẩu <span class="required">*</span>
-            </label>
-            <div class="password-input-wrap">
-              <input 
-                type="password" 
-                id="password" 
-                name="password" 
-                class="form-input"
-                placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
-                required
-                minlength="6"
-              />
-              <button type="button" class="toggle-password" onclick="togglePassword('password')">
-                👁️
-              </button>
-            </div>
-            <small class="form-hint">Mật khẩu phải có ít nhất 6 ký tự</small>
-          </div>
-
-          <div class="form-group">
-            <label for="confirm_password" class="form-label">
-              <span class="label-icon">🔒</span>
-              Xác nhận mật khẩu <span class="required">*</span>
-            </label>
-            <div class="password-input-wrap">
-              <input 
-                type="password" 
-                id="confirm_password" 
-                name="confirm_password" 
-                class="form-input"
-                placeholder="Nhập lại mật khẩu"
-                required
-              />
-              <button type="button" class="toggle-password" onclick="togglePassword('confirm_password')">
-                👁️
-              </button>
-            </div>
-          </div>
-
-          <button type="submit" class="btn-submit">
-            <span class="btn-text">Đăng ký</span>
-            <span class="btn-icon">→</span>
-          </button>
-        </form>
-
-        <div class="auth-footer">
-          <p class="footer-text">
-            Đã có tài khoản? 
-            <a href="{% url 'weather:login' %}" class="footer-link">Đăng nhập ngay</a>
-          </p>
-          <a href="{% url 'weather:home' %}" class="back-home">
-            ← Về trang chủ
-          </a>
+    <div class="auth-bg">
+        <div class="auth-particles"></div>
+        <div class="auth-gradient"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <script>
-    function togglePassword(inputId) {
-      const input = document.getElementById(inputId);
-      const button = input.nextElementSibling;
-      
-      if (input.type === 'password') {
-        input.type = 'text';
-        button.textContent = '🙈';
-      } else {
-        input.type = 'password';
-        button.textContent = '👁️';
-      }
-    }
+    <div class="auth-container">
+        <div class="auth-card glass-effect">
+            <div class="auth-header">
+                <div class="auth-logo-wrapper">
+                    <div class="auth-logo">
+                        <span class="logo-dot pulse-dot"></span>
+                        <span class="logo-text">VN Weather Hub</span>
+                    </div>
+                </div>
+                <div class="icon-wrapper-large">
+                    <div class="icon-circle-gradient">
+                        <div class="icon-inner">
+                            <svg class="lock-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <h1 class="auth-title">Đăng ký tài khoản</h1>
+                <p class="auth-subtitle">Tạo tài khoản mới để sử dụng đầy đủ tính năng</p>
+            </div>
 
-    // Auto hide messages after 5 seconds
-    setTimeout(() => {
-      const messages = document.querySelectorAll('.alert');
-      messages.forEach(msg => {
-        msg.style.opacity = '0';
-        msg.style.transform = 'translateY(-10px)';
-        setTimeout(() => msg.remove(), 300);
-      });
-    }, 5000);
+            {% if messages %}
+                <div class="auth-messages">
+                    {% for message in messages %}
+                        <div class="auth-alert auth-alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
-    // Password match validation
-    const password = document.getElementById('password');
-    const confirmPassword = document.getElementById('confirm_password');
-    
-    confirmPassword.addEventListener('input', function() {
-      if (password.value !== confirmPassword.value) {
-        confirmPassword.setCustomValidity('Mật khẩu không khớp');
-      } else {
-        confirmPassword.setCustomValidity('');
-      }
-    });
-  </script>
+            <form method="post" action="{% url 'weather:register' %}" class="auth-form" novalidate>
+                {% csrf_token %}
+                
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+                    <div class="form-group animated-input" style="margin-bottom: 0;">
+                        <label for="first_name" class="form-label">
+                            <span class="label-icon">📝</span>
+                            Họ
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="first_name" 
+                                name="first_name" 
+                                class="form-input"
+                                placeholder="Họ"
+                            >
+                            <span class="input-border"></span>
+                        </div>
+                    </div>
 
+                    <div class="form-group animated-input" style="margin-bottom: 0;">
+                        <label for="last_name" class="form-label">
+                            <span class="label-icon">📝</span>
+                            Tên
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="last_name" 
+                                name="last_name" 
+                                class="form-input"
+                                placeholder="Tên"
+                            >
+                            <span class="input-border"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group animated-input">
+                    <label for="username" class="form-label">
+                        <span class="label-icon">👤</span>
+                        Tên đăng nhập <span style="color: #ef4444;">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            class="form-input"
+                            placeholder="Nhập tên đăng nhập"
+                            required
+                            autofocus
+                            minlength="3"
+                        >
+                        <span class="input-border"></span>
+                    </div>
+                </div>
+
+                <div class="form-group animated-input">
+                    <label for="email" class="form-label">
+                        <span class="label-icon">📧</span>
+                        Email <span style="color: #ef4444;">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            class="form-input"
+                            placeholder="example@domain.com"
+                            required
+                        >
+                        <span class="input-border"></span>
+                    </div>
+                </div>
+
+                <div class="form-group animated-input">
+                    <label for="password" class="form-label">
+                        <span class="label-icon">🔒</span>
+                        Mật khẩu <span style="color: #ef4444;">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input"
+                            placeholder="Tối thiểu 6 ký tự"
+                            required
+                            minlength="6"
+                        >
+                        <span class="input-border"></span>
+                    </div>
+                </div>
+
+                <div class="form-group animated-input">
+                    <label for="confirm_password" class="form-label">
+                        <span class="label-icon">🔒</span>
+                        Xác nhận mật khẩu <span style="color: #ef4444;">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="password" 
+                            id="confirm_password" 
+                            name="confirm_password" 
+                            class="form-input"
+                            placeholder="Nhập lại mật khẩu"
+                            required
+                        >
+                        <span class="input-border"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full btn-glow">
+                    <span class="btn-ripple"></span>
+                    <span class="btn-text">Đăng ký</span>
+                    <span class="btn-icon">✓</span>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <div class="auth-divider-line"></div>
+                <div class="auth-links">
+                    <span style="color: #94a3b8; font-size: 13px;">Đã có tài khoản?</span>
+                    <a href="{% url 'weather:login' %}" class="auth-link hover-slide">
+                        <span class="link-text">Đăng nhập ngay</span>
+                        <span class="link-icon">→</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-extra">
+            <a href="{% url 'weather:home' %}" class="back-home glass-button">
+                <span class="home-icon">🏠</span>
+                <span class="home-text">Về trang chủ</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Weather Effects -->
+    <div class="wx-layer wx-clouds" aria-hidden="true"></div>
+    <div class="wx-layer wx-rain" aria-hidden="true"></div>
+    <div class="wx-lightning-subtle" aria-hidden="true"></div>
+
+    <script>
+        // Password match validation
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirm_password');
+        
+        confirmPassword.addEventListener('input', function() {
+            if (password.value !== confirmPassword.value) {
+                confirmPassword.setCustomValidity('Mật khẩu không khớp');
+            } else {
+                confirmPassword.setCustomValidity('');
+            }
+        });
+    </script>
 </body>
 </html>

@@ -29,6 +29,10 @@ from .views.View_Auth import (
     register_view,
     logout_view,
     profile_view,
+    forgot_password_view,
+    password_reset_sent_view,
+    reset_password_view,
+    password_reset_complete_view,
 )
 
 app_name = "weather"
@@ -64,9 +68,13 @@ urlpatterns = [
     path("datasets/clean/tail/", clean_data_tail_view, name="clean_tail"),
     
     # Authentication URLs
-    path("login/", login_view, name="login"),
-    path("register/", register_view, name="register"),
-    path("logout/", logout_view, name="logout"),
-    path("profile/", profile_view, name="profile"),
+    path("auth/login/", login_view, name="login"),
+    path("auth/register/", register_view, name="register"),
+    path("auth/logout/", logout_view, name="logout"),
+    path("auth/profile/", profile_view, name="profile"),
+    path("auth/forgot-password/", forgot_password_view, name="forgot_password"),
+    path("auth/password-reset-sent/", password_reset_sent_view, name="password_reset_sent"),
+    path("auth/reset-password/<uidb64>/<token>/", reset_password_view, name="reset_password"),
+    path("auth/password-reset-complete/", password_reset_complete_view, name="password_reset_complete"),
 
 ]

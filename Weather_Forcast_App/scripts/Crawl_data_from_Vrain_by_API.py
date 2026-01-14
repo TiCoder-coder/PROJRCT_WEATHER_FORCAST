@@ -922,22 +922,39 @@ class VrainScraper:
         return "Không xác định"
 
     def _identify_district(self, station_name: str) -> str:
-        """Xác định huyện/quận từ tên trạm"""
-        station_name_upper = station_name.upper()
-
-        for keyword in self.district_keywords:
-            if keyword.upper() in station_name_upper:
-                # Tìm phần chứa keyword
-                parts = station_name.split()
-                for i, part in enumerate(parts):
-                    if keyword in part:
-                        # Lấy phần tiếp theo nếu có
-                        if i + 1 < len(parts):
-                            return f"{part} {parts[i+1]}"
-                        else:
-                            return part
-                return keyword
-
+        """Xác định huyện/quận từ tên trạm - chỉ lấy khi có thông tin rõ ràng"""
+        if not station_name:
+            return ""
+            
+        station_name_clean = station_name.strip()
+        parts = station_name_clean.split()
+        
+        # Tìm từ khóa quận/huyện
+        for i, part in enumerate(parts):
+            part_clean = part.strip()
+            for keyword in self.district_keywords:
+                # Kiểm tra nếu part chứa keyword
+                if keyword in part_clean:
+                    result = part_clean
+                    
+                    # Lấy tên đầy đủ (tối đa 2 từ tiếp theo)
+                    j = i + 1
+                    while j < len(parts) and j < i + 3:
+                        next_part = parts[j].strip()
+                        
+                        # Dừng nếu gặp từ khóa khác (Xã, Phường, Thị trấn) hoặc ký tự đặc biệt
+                        if any(stop in next_part for stop in ["Xã", "Phường", "Thị", "Trấn", "Trạm", "(", ")", ",", "-"]):
+                            break
+                        
+                        # Dừng nếu là từ viết tắt hoặc code (VD: HN, HCM, KT1)
+                        if len(next_part) <= 3 and next_part.isupper():
+                            break
+                            
+                        result += " " + next_part
+                        j += 1
+                    
+                    return result
+        
         return ""
 
     def _get_rainfall_description(self, rainfall_value: float) -> str:
@@ -1092,54 +1109,40 @@ class VrainScraper:
         return processed_data
 
     def crawl_all_stations(self) -> List[Dict]:
-        """Crawl danh sách tất cả các trạm từ vrain.vn"""
+        """Crawl danh sách tất cả các trạm từ vrain.vn - crawl theo tỉnh"""
         all_stations = []
 
         try:
-            logging.info("🏢 Bắt đầu thu thập danh sách trạm từ vrain.vn")
+            logging.info("🏢 Bắt đầu thu thập danh sách trạm từ vrain.vn theo từng tỉnh")
 
-            # Thử các endpoint API trước
-            for endpoint in self.api_endpoints:
+            # Crawl từ từng tỉnh (ID từ 1 đến 63)
+            for province_id in range(1, 64):
                 try:
-                    if "station" in endpoint.lower():
-                        response = self.session.get(endpoint, timeout=10)
-                        if response.status_code == 200:
-                            content_type = response.headers.get("content-type", "")
-                            if "application/json" in content_type:
-                                json_data = response.json()
-                                # Xử lý JSON data cho stations
-                                stations = self._process_station_json(json_data)
-                                if stations:
-                                    all_stations.extend(stations)
-                                    logging.info(
-                                        f"✅ Tìm thấy {len(stations)} trạm từ API: {endpoint}"
-                                    )
-                                    break
-                except:
+                    url = f"{self.base_url}/{province_id}/overview?public_map=windy"
+                    response = self.session.get(url, timeout=15)
+                    
+                    if response.status_code == 200:
+                        stations = self.extract_stations_from_html(response.text)
+                        if stations:
+                            all_stations.extend(stations)
+                            logging.info(f"  ✅ Tỉnh ID {province_id}: {len(stations)} trạm")
+                        time.sleep(0.5)  # Tránh quá tải server
+                except Exception as e:
+                    logging.debug(f"  ⚠️ Lỗi tỉnh ID {province_id}: {e}")
                     continue
 
-            # Nếu không có từ API, thử từ HTML
-            if not all_stations:
-                response = self.session.get(self.base_url, timeout=15)
-                if response.status_code == 200:
-                    stations = self.extract_stations_from_html(response.text)
-                    all_stations.extend(stations)
-
-            # Nếu vẫn không có, tạo dữ liệu mẫu
-            if not all_stations:
-                logging.warning("⚠️ Không lấy được danh sách trạm, tạo dữ liệu mẫu")
-                all_stations = self.generate_sample_stations()
-
-            # Làm giàu dữ liệu
-            enriched_stations = self.enrich_station_data(all_stations)
-
-            logging.info(f"✅ Đã thu thập {len(enriched_stations)} trạm từ vrain.vn")
-
-            return enriched_stations
+            # Làm giàu dữ liệu nếu có
+            if all_stations:
+                enriched_stations = self.enrich_station_data(all_stations)
+                logging.info(f"✅ Đã thu thập {len(enriched_stations)} trạm từ vrain.vn")
+                return enriched_stations
+            else:
+                logging.warning("⚠️ Không lấy được danh sách trạm từ vrain.vn")
+                return []
 
         except Exception as e:
             logging.error(f"❌ Lỗi crawl danh sách trạm: {e}")
-            return self.generate_sample_stations()
+            return []
 
     def _process_station_json(self, json_data: Any) -> List[Dict]:
         """Xử lý JSON data cho danh sách trạm"""
@@ -1255,23 +1258,11 @@ class VrainScraper:
                 if i > 0:
                     station_name = f"{station_type} {location} {province_name} {i+1}"
 
-                # Tạo huyện
-                districts = [
-                    "Quận 1",
-                    "Quận 2",
-                    "Quận 3",
-                    "Huyện A",
-                    "Huyện B",
-                    "Thành phố",
-                    "Thị xã",
-                ]
-                district = random.choice(districts) if random.random() > 0.3 else ""
-
                 stations.append(
                     {
                         "station_name": station_name,
                         "province_name": province_name,
-                        "district": district,
+                        "district": "",
                         "latitude": 0,
                         "longitude": 0,
                         "elevation": random.randint(0, 500),
@@ -1362,7 +1353,7 @@ class VrainScraper:
 
         except Exception as e:
             logging.error(f"❌ Lỗi crawl dữ liệu thực tế từ vrain.vn: {e}")
-            return self.get_comprehensive_sample_data()
+            return []
 
     def _generate_realistic_rainfall(self, station: Dict) -> float:
         """Tạo lượng mưa thực tế dựa trên vị trí và thời gian"""
@@ -1479,21 +1470,6 @@ class VrainScraper:
                 if i > 0:
                     station_name = f"{random.choice(prefixes)}{random.choice(station_types)} {province_name} {i+1}"
 
-                # Tạo huyện
-                districts = [
-                    "Quận 1",
-                    "Quận 2",
-                    "Quận 3",
-                    "Quận 4",
-                    "Quận 5",
-                    "Huyện A",
-                    "Huyện B",
-                    "Huyện C",
-                    "Thành phố",
-                    "Thị xã",
-                ]
-                district = random.choice(districts) if random.random() > 0.4 else ""
-
                 # Tạo lượng mưa thực tế
                 rainfall_value = self._generate_realistic_rainfall(
                     {"province_name": province_name}
@@ -1507,7 +1483,7 @@ class VrainScraper:
                     {
                         "province_name": province_name,
                         "station_name": station_name,
-                        "district": district,
+                        "district": "",
                         "rainfall_value": rainfall_value,
                         "rainfall_unit": "mm",
                         "rainfall_description": self._get_rainfall_description(
@@ -2080,19 +2056,9 @@ class VietnamWeatherCrawler:
                         station_rain_data = rain_data
                         break
 
-                # Nếu không tìm thấy dữ liệu mưa, tạo dữ liệu mẫu
+                # Bỏ qua nếu không có dữ liệu mưa thực tế
                 if not station_rain_data:
-                    station_rain_data = {
-                        "station_name": station["station_name"],
-                        "rainfall_value": self.vrain_scraper._generate_realistic_rainfall(
-                            station
-                        ),
-                        "rainfall_unit": "mm",
-                        "measurement_time": datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "data_source": "vrain.vn (tổng hợp)",
-                    }
+                    continue
 
                 # Kết hợp dữ liệu
                 combined_item = {**station, **station_rain_data}
@@ -2263,166 +2229,30 @@ class VietnamWeatherCrawler:
             logging.error(f"❌ Lỗi lưu dữ liệu toàn diện: {e}")
             return None
 
-    def save_comprehensive_excel(self, combined_data, output_dir="/PROJECT_WEATHER_FORECAST/Weather_Forcast_App/output"):
+    def save_comprehensive_excel(self, combined_data, output_dir=None):
         """Lưu dữ liệu toàn diện ra file Excel"""
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        if output_dir is None:
+            # Lấy đường dẫn thư mục script và tìm thư mục output
+            script_dir = Path(__file__).parent
+            output_dir = script_dir.parent / "output"
+        
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        excel_file = os.path.join(
-            output_dir, f"vrain_comprehensive_data_{timestamp}.xlsx"
-        )
+        excel_file = str(output_dir / f"vrain_comprehensive_data_{timestamp}.xlsx")
 
         wb = Workbook()
-
-        # ========== SHEET 1: DANH SÁCH TRẠM THEO TỈNH ==========
-        ws_stations = wb.active
-        ws_stations.title = "Trạm Theo Tỉnh"
-
-        # Tiêu đề
-        ws_stations.merge_cells("A1:H1")
-        title_cell = ws_stations.cell(
-            row=1, column=1, value=f"DANH SÁCH TRẠM QUAN TRẮC THEO TỈNH THÀNH"
-        )
-        title_cell.font = Font(bold=True, size=16, color="366092")
-        title_cell.alignment = Alignment(horizontal="center")
-
-        ws_stations.merge_cells("A2:H2")
-        time_cell = ws_stations.cell(
-            row=2,
-            column=1,
-            value=f"Thời gian thu thập: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Tổng số trạm: {len(combined_data)}",
-        )
-        time_cell.font = Font(italic=True, size=10)
-        time_cell.alignment = Alignment(horizontal="center")
-
-        # Header
-        headers = [
-            "STT",
-            "Tỉnh/TP",
-            "Tên Trạm",
-            "Huyện/Quận",
-            "Vĩ độ",
-            "Kinh độ",
-            "Độ cao (m)",
-            "Loại trạm",
-            "Nguồn dữ liệu",
-        ]
-
-        for col_idx, header in enumerate(headers, start=1):
-            cell = ws_stations.cell(row=4, column=col_idx, value=header)
-            cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = PatternFill(
-                start_color="366092", end_color="366092", fill_type="solid"
-            )
-            cell.alignment = Alignment(horizontal="center", vertical="center")
-            cell.border = Border(
-                left=Side(style="thin", color="000000"),
-                right=Side(style="thin", color="000000"),
-                top=Side(style="thin", color="000000"),
-                bottom=Side(style="thin", color="000000"),
-            )
-
-        # Dữ liệu trạm, nhóm theo tỉnh
-        current_province = ""
-        row_idx = 5
-        station_counter = 1
-        province_start_row = 5
 
         # Sắp xếp dữ liệu theo tỉnh
         sorted_data = sorted(combined_data, key=lambda x: x.get("province_name", ""))
 
-        for idx, data in enumerate(sorted_data, start=1):
-            province_name = data.get("province_name", "")
-
-            # Nếu đổi tỉnh, thêm dòng phân cách
-            if province_name != current_province:
-                if current_province != "":
-                    # Tô màu cho nhóm tỉnh trước đó
-                    for r in range(province_start_row, row_idx):
-                        for c in range(1, len(headers) + 1):
-                            cell = ws_stations.cell(row=r, column=c)
-                            if r % 2 == 0:
-                                cell.fill = PatternFill(
-                                    start_color="F2F2F2",
-                                    end_color="F2F2F2",
-                                    fill_type="solid",
-                                )
-
-                    # Thêm dòng tổng kết cho tỉnh trước
-                    ws_stations.cell(
-                        row=row_idx, column=2, value=f"Tổng số trạm {current_province}:"
-                    )
-                    ws_stations.cell(
-                        row=row_idx, column=3, value=idx - province_start_row
-                    )
-                    for c in range(1, len(headers) + 1):
-                        cell = ws_stations.cell(row=row_idx, column=c)
-                        cell.fill = PatternFill(
-                            start_color="E6E6FF", end_color="E6E6FF", fill_type="solid"
-                        )
-                        cell.font = Font(bold=True)
-
-                    row_idx += 2
-
-                # Tiêu đề tỉnh mới
-                ws_stations.merge_cells(f"A{row_idx}:H{row_idx}")
-                province_cell = ws_stations.cell(
-                    row=row_idx, column=1, value=f"TỈNH: {province_name}"
-                )
-                province_cell.font = Font(bold=True, size=12, color="FFFFFF")
-                province_cell.fill = PatternFill(
-                    start_color="00B050", end_color="00B050", fill_type="solid"
-                )
-                province_cell.alignment = Alignment(horizontal="center")
-
-                row_idx += 1
-                current_province = province_name
-                province_start_row = row_idx
-                station_counter = 1
-
-            # Dữ liệu trạm
-            row_data = [
-                station_counter,
-                province_name,
-                data.get("station_name", ""),
-                data.get("district", ""),
-                data.get("latitude", 0),
-                data.get("longitude", 0),
-                data.get("elevation", 0),
-                data.get("station_type", "Khí tượng"),
-                data.get("data_source", "vrain.vn"),
-            ]
-
-            for col_idx, value in enumerate(row_data, start=1):
-                cell = ws_stations.cell(row=row_idx, column=col_idx, value=value)
-                cell.alignment = Alignment(horizontal="center", vertical="center")
-
-                cell.border = Border(
-                    left=Side(style="thin", color="CCCCCC"),
-                    right=Side(style="thin", color="CCCCCC"),
-                    top=Side(style="thin", color="CCCCCC"),
-                    bottom=Side(style="thin", color="CCCCCC"),
-                )
-
-            station_counter += 1
-            row_idx += 1
-
-        # Tô màu cho nhóm tỉnh cuối cùng
-        if current_province != "":
-            for r in range(province_start_row, row_idx):
-                for c in range(1, len(headers) + 1):
-                    cell = ws_stations.cell(row=r, column=c)
-                    if (r - province_start_row) % 2 == 0:
-                        cell.fill = PatternFill(
-                            start_color="F2F2F2", end_color="F2F2F2", fill_type="solid"
-                        )
-
-        # ========== SHEET 2: DỮ LIỆU MƯA THEO TRẠM ==========
-        ws_rainfall = wb.create_sheet("Dữ Liệu Mưa")
+        # ========== SHEET: DỮ LIỆU MƯA THEO TRẠM ==========
+        ws_rainfall = wb.active
+        ws_rainfall.title = "Dữ Liệu Mưa"
 
         # Tiêu đề
-        ws_rainfall.merge_cells("A1:G1")
+        ws_rainfall.merge_cells("A1:F1")
         title_cell = ws_rainfall.cell(
             row=1, column=1, value="DỮ LIỆU LƯỢNG MƯA THEO TRẠM"
         )
@@ -2436,9 +2266,7 @@ class VietnamWeatherCrawler:
             "Tên Trạm",
             "Huyện/Quận",
             "Lượng Mưa (mm)",
-            "Mô tả",
             "Thời gian đo",
-            "Nguồn dữ liệu",
         ]
 
         for col_idx, header in enumerate(rain_headers, start=1):
@@ -2457,9 +2285,7 @@ class VietnamWeatherCrawler:
                 data.get("station_name", ""),
                 data.get("district", ""),
                 round(data.get("rainfall_value", 0), 2),
-                data.get("rainfall_description", ""),
                 data.get("measurement_time", ""),
-                data.get("data_source", ""),
             ]
 
             for col_idx, value in enumerate(row_data, start=1):
@@ -2489,219 +2315,18 @@ class VietnamWeatherCrawler:
                     bottom=Side(style="thin", color="CCCCCC"),
                 )
 
-        # ========== SHEET 3: THỐNG KÊ THEO TỈNH ==========
-        ws_stats = wb.create_sheet("Thống Kê Tỉnh")
-
-        # Tiêu đề
-        ws_stats.merge_cells("A1:H1")
-        title_cell = ws_stats.cell(
-            row=1, column=1, value="THỐNG KÊ TRẠM VÀ LƯỢNG MƯA THEO TỈNH"
-        )
-        title_cell.font = Font(bold=True, size=14, color="800080")
-        title_cell.alignment = Alignment(horizontal="center")
-
-        # Header
-        stats_headers = [
-            "STT",
-            "Tỉnh/TP",
-            "Vùng",
-            "Số Trạm",
-            "Lượng Mưa TB (mm)",
-            "Lượng Mưa Max (mm)",
-            "Lượng Mưa Min (mm)",
-            "Trạng thái",
-        ]
-
-        for col_idx, header in enumerate(stats_headers, start=1):
-            cell = ws_stats.cell(row=3, column=col_idx, value=header)
-            cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = PatternFill(
-                start_color="800080", end_color="800080", fill_type="solid"
-            )
-            cell.alignment = Alignment(horizontal="center", vertical="center")
-
-        # Tính toán thống kê theo tỉnh
-        province_stats = {}
-        for data in combined_data:
-            province_name = data.get("province_name", "")
-            if province_name not in province_stats:
-                province_stats[province_name] = {
-                    "stations": [],
-                    "rainfall_values": [],
-                    "region": "",
-                }
-
-            province_stats[province_name]["stations"].append(
-                data.get("station_name", "")
-            )
-            province_stats[province_name]["rainfall_values"].append(
-                data.get("rainfall_value", 0)
-            )
-
-            # Tìm vùng cho tỉnh
-            if not province_stats[province_name]["region"]:
-                for province in self.provinces_data:
-                    if province["province_name"] == province_name:
-                        province_stats[province_name]["region"] = province.get(
-                            "region", "Khác"
-                        )
-                        break
-
-        # Dữ liệu thống kê
-        row_idx = 4
-        for idx, (province_name, stats) in enumerate(
-            sorted(province_stats.items()), start=1
-        ):
-            rainfall_values = stats["rainfall_values"]
-            avg_rainfall = (
-                sum(rainfall_values) / len(rainfall_values) if rainfall_values else 0
-            )
-            max_rainfall = max(rainfall_values) if rainfall_values else 0
-            min_rainfall = min(rainfall_values) if rainfall_values else 0
-
-            # Xác định trạng thái
-            if avg_rainfall == 0:
-                status = "Không mưa"
-                status_color = "FFFFFF"
-            elif avg_rainfall < 1:
-                status = "Mưa nhỏ"
-                status_color = "C6EFCE"
-            elif avg_rainfall < 5:
-                status = "Mưa vừa"
-                status_color = "FFEB9C"
-            elif avg_rainfall < 10:
-                status = "Mưa to"
-                status_color = "FFC7CE"
-            else:
-                status = "Mưa rất to"
-                status_color = "FF9999"
-
-            row_data = [
-                idx,
-                province_name,
-                stats["region"],
-                len(stats["stations"]),
-                round(avg_rainfall, 2),
-                round(max_rainfall, 2),
-                round(min_rainfall, 2),
-                status,
-            ]
-
-            for col_idx, value in enumerate(row_data, start=1):
-                cell = ws_stats.cell(row=row_idx, column=col_idx, value=value)
-                cell.alignment = Alignment(horizontal="center", vertical="center")
-
-                # Đánh dấu màu cho trạng thái
-                if col_idx == 8:
-                    cell.fill = PatternFill(
-                        start_color=status_color,
-                        end_color=status_color,
-                        fill_type="solid",
-                    )
-
-                cell.border = Border(
-                    left=Side(style="thin", color="CCCCCC"),
-                    right=Side(style="thin", color="CCCCCC"),
-                    top=Side(style="thin", color="CCCCCC"),
-                    bottom=Side(style="thin", color="CCCCCC"),
-                )
-
-            row_idx += 1
-
-        # ========== SHEET 4: TỔNG QUAN ==========
-        ws_summary = wb.create_sheet("Tổng Quan")
-
-        # Tiêu đề
-        ws_summary.merge_cells("A1:D1")
-        title_cell = ws_summary.cell(
-            row=1, column=1, value="TỔNG QUAN HỆ THỐNG TRẠM QUAN TRẮC"
-        )
-        title_cell.font = Font(bold=True, size=14, color="0070C0")
-        title_cell.alignment = Alignment(horizontal="center")
-
-        # Thông tin tổng quan
-        summary_data = [
-            ["Thời điểm thu thập", datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
-            ["Tổng số trạm", len(combined_data)],
-            ["Số tỉnh có dữ liệu", len(province_stats)],
-            [
-                "Tỉnh có nhiều trạm nhất",
-                (
-                    max(province_stats.items(), key=lambda x: len(x[1]["stations"]))[0]
-                    if province_stats
-                    else "N/A"
-                ),
-            ],
-            [
-                "Tỉnh có lượng mưa TB cao nhất",
-                (
-                    max(
-                        province_stats.items(),
-                        key=lambda x: (
-                            sum(x[1]["rainfall_values"]) / len(x[1]["rainfall_values"])
-                            if x[1]["rainfall_values"]
-                            else 0
-                        ),
-                    )[0]
-                    if province_stats
-                    else "N/A"
-                ),
-            ],
-            [
-                "Tổng lượng mưa TB toàn quốc",
-                (
-                    round(
-                        sum(
-                            sum(stats["rainfall_values"])
-                            for stats in province_stats.values()
-                        )
-                        / sum(
-                            len(stats["rainfall_values"])
-                            for stats in province_stats.values()
-                        ),
-                        2,
-                    )
-                    if province_stats
-                    else 0
-                ),
-            ],
-            [
-                "Số trạm có mưa (>0 mm)",
-                sum(1 for data in combined_data if data.get("rainfall_value", 0) > 0),
-            ],
-            [
-                "Số trạm không mưa",
-                sum(1 for data in combined_data if data.get("rainfall_value", 0) == 0),
-            ],
-        ]
-
-        for idx, (label, value) in enumerate(summary_data, start=3):
-            ws_summary.cell(row=idx, column=1, value=label).font = Font(bold=True)
-            ws_summary.cell(row=idx, column=2, value=value)
-
-            # Định dạng
-            for col in [1, 2]:
-                cell = ws_summary.cell(row=idx, column=col)
-                cell.border = Border(
-                    left=Side(style="thin", color="CCCCCC"),
-                    right=Side(style="thin", color="CCCCCC"),
-                    top=Side(style="thin", color="CCCCCC"),
-                    bottom=Side(style="thin", color="CCCCCC"),
-                )
-
-        # Điều chỉnh độ rộng cột cho tất cả sheet
-        for ws in [ws_stations, ws_rainfall, ws_stats, ws_summary]:
-            for column in ws.columns:
-                max_length = 0
-                column_letter = get_column_letter(column[0].column)
-                for cell in column:
-                    try:
-                        if len(str(cell.value)) > max_length:
-                            max_length = len(str(cell.value))
-                    except:
-                        pass
-                adjusted_width = min(max_length + 2, 30)
-                ws.column_dimensions[column_letter].width = adjusted_width
+        # Điều chỉnh độ rộng cột
+        for column in ws_rainfall.columns:
+            max_length = 0
+            column_letter = get_column_letter(column[0].column)
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 30)
+            ws_rainfall.column_dimensions[column_letter].width = adjusted_width
 
         # Lưu file
         wb.save(excel_file)

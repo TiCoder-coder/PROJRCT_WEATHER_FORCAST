@@ -240,11 +240,13 @@ class VrainCrawlerFinal:
             "Thời gian cập nhật",
         ]
 
-        output_dir = "/PROJECT_WEATHER_FORECAST/Weather_Forcast_App/output"
+        # Lấy đường dẫn thư mục script hiện tại và tìm thư mục output
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        output_dir = os.path.join(os.path.dirname(script_dir), "output")
         os.makedirs(output_dir, exist_ok=True)
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        excel_path = os.path.join(output_dir, f"Bao_cao_mua_{timestamp}.xlsx")
+        excel_path = os.path.join(output_dir, f"Bao_cao_mua_selenium{timestamp}.xlsx")
         df.to_excel(excel_path, index=False)
 
         print(f"\n{'=' * 60}")
@@ -264,6 +266,6 @@ class VrainCrawlerFinal:
 
 
 if __name__ == "__main__":
-    crawler = VrainCrawlerFinal(headless=False, max_workers=63, max_retries=3)
+    crawler = VrainCrawlerFinal(headless=True, max_workers=3, max_retries=3)
     crawler.run(start_id=1, end_id=63)
     crawler.export()
