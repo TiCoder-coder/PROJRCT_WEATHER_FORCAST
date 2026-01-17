@@ -202,7 +202,7 @@ def dataset_view_view(request, folder: str, filename: str):
     if file_type in ['csv', 'excel']:
         try:
             page = int(request.GET.get('page', 1))
-            rows_per_page = 100
+            rows_per_page = 10000
             start_row = (page - 1) * rows_per_page
             end_row = start_row + rows_per_page
             
@@ -256,7 +256,7 @@ def dataset_view_view(request, folder: str, filename: str):
                 'is_table': True,
             }
             
-            return render(request, 'weather/dataset_preview.html', context)
+            return render(request, 'weather/Dataset_preview.html', context)
             
         except Exception as e:
             error_context = {
@@ -265,7 +265,7 @@ def dataset_view_view(request, folder: str, filename: str):
                 'error_detail': str(e),
                 'back_url': request.META.get('HTTP_REFERER', '/'),
             }
-            return render(request, 'weather/error.html', error_context, status=500)
+            return render(request, 'weather/Error.html', error_context, status=500)
     
     else:
         try:
@@ -283,7 +283,7 @@ def dataset_view_view(request, folder: str, filename: str):
                 'is_table': False,
             }
             
-            return render(request, 'weather/dataset_preview.html', context)
+            return render(request, 'weather/Dataset_preview.html', context)
             
         except UnicodeDecodeError:
             try:
@@ -301,7 +301,7 @@ def dataset_view_view(request, folder: str, filename: str):
                     'is_table': False,
                 }
                 
-                return render(request, 'weather/dataset_preview.html', context)
+                return render(request, 'weather/Dataset_preview.html', context)
                 
             except Exception as e:
                 content_type, _ = mimetypes.guess_type(str(p))
@@ -316,7 +316,7 @@ def dataset_view_view(request, folder: str, filename: str):
                 'error_detail': str(e),
                 'back_url': request.META.get('HTTP_REFERER', '/'),
             }
-            return render(request, 'weather/error.html', error_context, status=500)
+            return render(request, 'weather/Error.html', error_context, status=500)
         
 def _cleaned_merge_dir() -> Path:
     return _cleaned_dir() / "Clean_Data_For_File_Merge"

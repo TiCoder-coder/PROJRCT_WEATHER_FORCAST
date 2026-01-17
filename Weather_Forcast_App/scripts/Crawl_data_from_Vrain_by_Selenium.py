@@ -228,29 +228,28 @@ class VrainCrawlerFinal:
             return
 
         df = pd.DataFrame(self.all_rainfall_data)
+        df = df.drop(columns=["province_id"], errors="ignore")
 
-        df.insert(0, "STT", range(1, len(df) + 1))
+        # df.insert(0, "STT", range(1, len(df) + 1))
 
-        df.columns = [
-            "STT",
-            "ID Tỉnh",
-            "Tỉnh/Thành phố",
-            "Tên Trạm",
-            "Lượng mưa (mm)",
-            "Thời gian cập nhật",
-        ]
+        df = df.rename(columns={
+            "tinh": "Tỉnh/Thành phố",
+            "tram": "Tên trạm",
+            "luong_mua": "Tổng lượng mưa",
+            "thoi_gian": "Thời gian cập nhập",
+        })
 
-        output_dir = "/PROJECT_WEATHER_FORECAST/Weather_Forcast_App/output"
+
+        output_dir = "/media/voanhnhat/SDD_OUTSIDE5/PROJECT_WEATHER_FORECAST/Weather_Forcast_App/output"
         os.makedirs(output_dir, exist_ok=True)
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        excel_path = os.path.join(output_dir, f"Bao_cao_mua_{timestamp}.xlsx")
+        excel_path = os.path.join(output_dir, f"Bao_cao_{timestamp}.xlsx")
         df.to_excel(excel_path, index=False)
 
         print(f"\n{'=' * 60}")
         print(f"📊 TỔNG KẾT:")
         print(f"📍 Tổng số trạm thu thập: {len(df)}")
-        print(f"🗂️  Số tỉnh/thành: {df['ID Tỉnh'].nunique()}")
 
         if self.failed_provinces:
             print(
@@ -264,6 +263,6 @@ class VrainCrawlerFinal:
 
 
 if __name__ == "__main__":
-    crawler = VrainCrawlerFinal(headless=False, max_workers=63, max_retries=3)
+    crawler = VrainCrawlerFinal(headless=True, max_workers=3, max_retries=3)
     crawler.run(start_id=1, end_id=63)
     crawler.export()

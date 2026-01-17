@@ -405,9 +405,97 @@ Clean Wizard trong `Datasets.html` gồm 3 step:
 - Python 3.x
 - Django 3.x
 - pandas
-- openpyxl
+- openpyx3
 
-### 11.2. Chạy nhanh
+### Cấu hình docker transaction
+- Hướng dẫn setting docker để chạy (Setting transaction mongodb)
+
+#### ✅ 1) Kiểm tra Docker trước (dọn tài nguyên nếu bị chiếm port / trùng container)
+
+- Xem container đang chạy: `docker ps`
+- Xem tất cả container: `docker ps -a`
+- Xoá container (nếu cần): `docker rm -f <container_id_or_name>`
+- Xem images: `docker images`
+- Xoá images (nếu cần): `docker rmi <image_id>`
+- Xem network: `docker network ls`
+- Xoá network (nếu cần): `docker network rm <network_name>`
+
+#### ✅ 2) Tạo network riêng cho Mongo Replica Set
+
+```bash
+docker network create mongoNet
+```
+
+#### ✅ 3) Pull MongoDB image (nếu chưa có)
+
+```bash
+docker pull mongo:latest
+```
+
+#### ✅ 4) Tạo 3 container chạy chung Replica Set (mongoRepSet)
+
+```bash
+docker run -d --name r0 --net mongoNet -p 27108:27017 mongo:latest mongod --replSet mongoRepSet --bind_ip_all --port 27017
+docker run -d --name r1 --net mongoNet -p 27109:27017 mongo:latest mongod --replSet mongoRepSet --bind_ip_all --port 27017
+docker run -d --name r2 --net mongoNet -p 27110:27017 mongo:latest mongod --replSet mongoRepSet --bind_ip_all --port 27017
+```
+
+- Lí do tạo ra 3 container (3 node) là vì replica set thường là 3 nốt để node primary mà hỏng thì cũng còn 2 node secondary vẫn sẽ chạy được, không làm hỏng chương trình.
+
+#### ✅ 5) Initiate Replica Set (chạy trong r0)
+
+- Setting r0 sẽ là primary còn lại là secondary
+
+```bash
+docker exec -it r0 mongosh --eval '
+rs.initiate({
+  _id: "mongoRepSet",
+  members: [
+    { _id: 0, host: "r0:27017" },
+    { _id: 1, host: "r1:27017" },
+    { _id: 2, host: "r2:27017" }
+  ]
+})
+'
+```
+
+#### ✅ 6) Kiểm tra trạng thái Replica Set
+
+```bash
+docker exec -it r0 mongosh --eval 'rs.status().members.map(m=>({name:m.name,stateStr:m.stateStr}))'
+```
+
+#### ✅ 7) Vào shell của node primary (r0)
+
+```bash
+docker exec -it r0 mongosh
+```
+
+- Check trạng thái:
+
+```bash
+rs.status()
+```
+
+#### ✅ 8) Test ghi database (primary ghi được, secondary sẽ báo lỗi)
+
+Trong `r0`:
+
+```bash
+use Login
+db.Login.insert({name: "test"})
+db.Login.find()
+```
+
+Vào `r1` hoặc `r2` và thử insert sẽ thấy báo lỗi (do secondary không cho ghi).
+
+---
+
+### 11.3. Cấu hình env
+SECRET_KEY = "..."
+MONGO_URI=mongodb://localhost:27108/Login?directConnection=true
+
+### 11.4. Chạy nhanh
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # Linux/macOS
@@ -437,6 +525,9 @@ python manage.py runserver
 ### 12.3. CSS không cập nhật
 - File CSS trong template có `?v=...` để cache-busting  
 - Nếu vẫn không thấy đổi: hard reload / clear cache
+
+### 12.4. Lỗi docker chưa chạy
+- Khởi động docker: docker start r0 r1 r2
 
 ---
 

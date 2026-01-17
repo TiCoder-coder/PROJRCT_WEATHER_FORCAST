@@ -24,14 +24,12 @@ logging.basicConfig(
 )
 
 BASE_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = BASE_DIR.parent
-APP_DIR = PROJECT_ROOT / "Weather_Forcast_App"
-OUTPUT_DIR = APP_DIR / "output"
+OUTPUT_DIR = "/media/voanhnhat/SDD_OUTSIDE5/PROJECT_WEATHER_FORECAST/Weather_Forcast_App/output"
 
 class SQLiteManager:
     """Quản lý kết nối và thao tác với SQLite database"""
 
-    def __init__(self, db_path="vietnam_weather.db"):
+    def __init__(self, db_path="/media/voanhnhat/SDD_OUTSIDE5/PROJECT_WEATHER_FORECAST/vietnam_weather.db"):
         self.db_path = db_path
         self.conn = None
         self.cursor = None
@@ -97,57 +95,63 @@ class SQLiteManager:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     station_id TEXT,
                     station_name TEXT,
-                    province_id TEXT,
-                    province_name TEXT,
+                    province TEXT,
+                    district TEXT,
                     latitude REAL,
                     longitude REAL,
                     timestamp TEXT,
                     data_source TEXT,
                     data_quality TEXT,
+                    data_time TEXT,
                     
                     -- Nhiệt độ
-                    temperature REAL,
-                    temperature_feels_like REAL,
-                    temperature_min REAL,
+                    temperature_current REAL,
                     temperature_max REAL,
+                    temperature_min REAL,
+                    temperature_avg REAL,
                     
                     -- Độ ẩm
-                    humidity REAL,
+                    humidity_current REAL,
+                    humidity_max REAL,
+                    humidity_min REAL,
+                    humidity_avg REAL,
                     
                     -- Áp suất
-                    pressure REAL,
+                    pressure_current REAL,
+                    pressure_max REAL,
+                    pressure_min REAL,
+                    pressure_avg REAL,
                     
                     -- Gió
-                    wind_speed REAL,
-                    wind_direction REAL,
-                    wind_gust REAL,
+                    wind_speed_current REAL,
+                    wind_speed_max REAL,
+                    wind_speed_min REAL,
+                    wind_speed_avg REAL,
+                    wind_direction_current REAL,
+                    wind_direction_avg REAL,
                     
                     -- Mưa
-                    rainfall_1h REAL,
-                    rainfall_3h REAL,
-                    rainfall_6h REAL,
-                    rainfall_12h REAL,
-                    rainfall_24h REAL,
-                    rainfall_total REAL,
-                    
-                    -- Tầm nhìn
-                    visibility REAL,
+                    rain_current REAL,
+                    rain_max REAL,
+                    rain_min REAL,
+                    rain_avg REAL,
+                    rain_total REAL,
                     
                     -- Mây
-                    cloudiness INTEGER,
+                    cloud_cover_current INTEGER,
+                    cloud_cover_max INTEGER,
+                    cloud_cover_min INTEGER,
+                    cloud_cover_avg INTEGER,
+                    
+                    -- Tầm nhìn
+                    visibility_current INTEGER,
+                    visibility_max INTEGER,
+                    visibility_min INTEGER,
+                    visibility_avg INTEGER,
                     
                     -- Các chỉ số khác
-                    uv_index REAL,
-                    dew_point REAL,
-                    
-                    -- Mô tả thời tiết
-                    weather_main TEXT,
-                    weather_description TEXT,
-                    weather_icon TEXT,
-                    
-                    -- Thời gian
-                    sunrise TEXT,
-                    sunset TEXT,
+                    thunder_probability INTEGER,
+                    error_reason TEXT,
                     
                     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     
@@ -284,52 +288,63 @@ class SQLiteManager:
                 self.cursor.execute(
                     """
                     INSERT INTO weather_data (
-                        station_id, station_name, province_id, province_name, latitude, longitude,
-                        timestamp, data_source, data_quality,
-                        temperature, temperature_feels_like, temperature_min, temperature_max,
-                        humidity, pressure,
-                        wind_speed, wind_direction, wind_gust,
-                        rainfall_1h, rainfall_3h, rainfall_6h, rainfall_12h, rainfall_24h, rainfall_total,
-                        visibility, cloudiness,
-                        uv_index, dew_point,
-                        weather_main, weather_description, weather_icon,
-                        sunrise, sunset
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        station_id, station_name, province, district, latitude, longitude,
+                        timestamp, data_source, data_quality, data_time,
+                        temperature_current, temperature_max, temperature_min, temperature_avg,
+                        humidity_current, humidity_max, humidity_min, humidity_avg,
+                        pressure_current, pressure_max, pressure_min, pressure_avg,
+                        wind_speed_current, wind_speed_max, wind_speed_min, wind_speed_avg,
+                        wind_direction_current, wind_direction_avg,
+                        rain_current, rain_max, rain_min, rain_avg, rain_total,
+                        cloud_cover_current, cloud_cover_max, cloud_cover_min, cloud_cover_avg,
+                        visibility_current, visibility_max, visibility_min, visibility_avg,
+                        thunder_probability, error_reason
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                     (
                         data.get("station_id", ""),
-                        data.get("station_name", data.get("province_name", "")),
-                        data["province_id"],
-                        data["province_name"],
+                        data.get("station_name", data.get("province", "")),
+                        data["province"],
+                        data["district"],
                         data["latitude"],
                         data["longitude"],
                         data["timestamp"],
                         data["data_source"],
                         data["data_quality"],
-                        data.get("temperature", 0),
-                        data.get("temperature_feels_like", 0),
-                        data.get("temperature_min", 0),
+                        data.get("data_time", ""),
+                        data.get("temperature_current", 0),
                         data.get("temperature_max", 0),
-                        data.get("humidity", 0),
-                        data.get("pressure", 0),
-                        data.get("wind_speed", 0),
-                        data.get("wind_direction", 0),
-                        data.get("wind_gust", 0),
-                        data.get("rainfall_1h", 0),
-                        data.get("rainfall_3h", 0),
-                        data.get("rainfall_6h", 0),
-                        data.get("rainfall_12h", 0),
-                        data.get("rainfall_24h", 0),
-                        data.get("rainfall_total", 0),
-                        data.get("visibility", 0),
-                        data.get("cloudiness", 0),
-                        data.get("uv_index", 0),
-                        data.get("dew_point", 0),
-                        data.get("weather_main", ""),
-                        data.get("weather_description", ""),
-                        data.get("weather_icon", ""),
-                        data.get("sunrise", ""),
-                        data.get("sunset", ""),
+                        data.get("temperature_min", 0),
+                        data.get("temperature_avg", 0),
+                        data.get("humidity_current", 0),
+                        data.get("humidity_max", 0),
+                        data.get("humidity_min", 0),
+                        data.get("humidity_avg", 0),
+                        data.get("pressure_current", 0),
+                        data.get("pressure_max", 0),
+                        data.get("pressure_min", 0),
+                        data.get("pressure_avg", 0),
+                        data.get("wind_speed_current", 0),
+                        data.get("wind_speed_max", 0),
+                        data.get("wind_speed_min", 0),
+                        data.get("wind_speed_avg", 0),
+                        data.get("wind_direction_current", 0),
+                        data.get("wind_direction_avg", 0),
+                        data.get("rain_current", 0),
+                        data.get("rain_max", 0),
+                        data.get("rain_min", 0),
+                        data.get("rain_avg", 0),
+                        data.get("rain_total", 0),
+                        data.get("cloud_cover_current", 0),
+                        data.get("cloud_cover_max", 0),
+                        data.get("cloud_cover_min", 0),
+                        data.get("cloud_cover_avg", 0),
+                        data.get("visibility_current", 0),
+                        data.get("visibility_max", 0),
+                        data.get("visibility_min", 0),
+                        data.get("visibility_avg", 0),
+                        data.get("thunder_probability", 0),
+                        data.get("error_reason", ""),
                     ),
                 )
                 inserted_count += 1
@@ -507,13 +522,14 @@ class SQLiteManager:
 
             results = self.cursor.fetchall()
             columns = [
-                "province_name",
-                "station_count",
-                "avg_rainfall",
-                "max_rainfall",
-                "min_rainfall",
-                "total_rainfall",
+                "ten_tinh",
+                "so_luong_tram",
+                "luong_mua_trung_binh",
+                "luong_mua_cao_nhat",
+                "luong_mua_thap_nhat",
+                "tong_luong_mua",
             ]
+
 
             summary = []
             for row in results:
@@ -835,12 +851,12 @@ class VrainScraper:
 
                                 all_data.append(
                                     {
-                                        "province_name": province_name,
-                                        "station_name": station_name,
-                                        "district": district,
-                                        "rainfall_value": rainfall_value,
-                                        "rainfall_unit": "mm",
-                                        "rainfall_description": self._get_rainfall_description(
+                                        "ten_tinh": province_name,
+                                        "ten_tram": station_name,
+                                        "quan_huyen": district,
+                                        "gia_tri_luong_mua": rainfall_value,
+                                        "don_vi_luong_mua": "mm",
+                                        "mo_ta_luong_mua": self._get_rainfall_description(
                                             rainfall_value
                                         ),
                                         "measurement_time": self._parse_time(
@@ -1270,12 +1286,11 @@ class VrainScraper:
                 stations.append(
                     {
                         "station_name": station_name,
-                        "province_name": province_name,
+                        "province": province_name,
                         "district": district,
                         "latitude": 0,
                         "longitude": 0,
-                        "elevation": random.randint(0, 500),
-                        "station_type": "Khí tượng thủy văn",
+                        "station_id": f"ST{hash(station_name) % 1000000:06d}",
                         "data_source": "vrain.vn (mẫu)",
                     }
                 )
@@ -1332,20 +1347,52 @@ class VrainScraper:
                     station_data = {
                         "station_name": station["station_name"],
                         "station_id": station.get("station_id", ""),
-                        "province_name": station["province_name"],
+                        "province": station.get("province", station.get("province_name", "")),
                         "district": station.get("district", ""),
-                        "rainfall_value": rainfall_value,
-                        "rainfall_unit": "mm",
-                        "rainfall_description": self._get_rainfall_description(
-                            rainfall_value
-                        ),
-                        "measurement_time": datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
                         "latitude": station.get("latitude", 0),
                         "longitude": station.get("longitude", 0),
-                        "elevation": station.get("elevation", 0),
+                        "timestamp": datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                        "data_time": datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
                         "data_source": "vrain.vn (thu thập)",
+                        "data_quality": "high",
+                        # Tạo dữ liệu mưa ngẫu nhiên dựa trên vị trí và thời gian
+                        "rain_current": rainfall_value,
+                        "rain_total": rainfall_value,
+                        "rain_avg": rainfall_value,
+                        "rain_min": 0,
+                        "rain_max": rainfall_value * 2,
+                        # Dữ liệu mô phỏng khác
+                        "temperature_current": random.uniform(20, 35),
+                        "temperature_max": random.uniform(28, 40),
+                        "temperature_min": random.uniform(18, 28),
+                        "temperature_avg": random.uniform(20, 35),
+                        "humidity_current": random.uniform(60, 95),
+                        "humidity_max": random.uniform(70, 100),
+                        "humidity_min": random.uniform(50, 85),
+                        "humidity_avg": random.uniform(60, 95),
+                        "pressure_current": random.uniform(1000, 1020),
+                        "pressure_max": random.uniform(1005, 1025),
+                        "pressure_min": random.uniform(995, 1015),
+                        "pressure_avg": random.uniform(1000, 1020),
+                        "wind_speed_current": random.uniform(0, 15),
+                        "wind_speed_max": random.uniform(15, 25),
+                        "wind_speed_min": 0,
+                        "wind_speed_avg": random.uniform(0, 12),
+                        "wind_direction_current": random.uniform(0, 360),
+                        "wind_direction_avg": random.uniform(0, 360),
+                        "cloud_cover_current": random.randint(0, 100),
+                        "cloud_cover_max": random.randint(20, 100),
+                        "cloud_cover_min": random.randint(0, 80),
+                        "cloud_cover_avg": random.randint(0, 100),
+                        "visibility_current": int(random.uniform(5, 20) * 1000),
+                        "visibility_max": int(random.uniform(10, 25) * 1000),
+                        "visibility_min": int(random.uniform(4, 15) * 1000),
+                        "visibility_avg": int(random.uniform(5, 20) * 1000),
+                        "thunder_probability": random.randint(0, 100) if rainfall_value > 0 else 0,
                     }
 
                     all_data.append(station_data)
@@ -1366,7 +1413,7 @@ class VrainScraper:
 
     def _generate_realistic_rainfall(self, station: Dict) -> float:
         """Tạo lượng mưa thực tế dựa trên vị trí và thời gian"""
-        province_name = station.get("province_name", "")
+        province_name = station.get("province", station.get("province_name", ""))
         current_hour = datetime.now().hour
         current_month = datetime.now().month
 
@@ -1496,28 +1543,58 @@ class VrainScraper:
 
                 # Tạo lượng mưa thực tế
                 rainfall_value = self._generate_realistic_rainfall(
-                    {"province_name": province_name}
+                    {"province": province_name}
                 )
 
                 # Tạo thời gian đo (trong 24h qua)
                 time_offset = random.randint(0, 1440)  # 0-1440 phút
                 measure_time = datetime.now() - timedelta(minutes=time_offset)
+                timestamp = measure_time.strftime("%Y-%m-%d %H:%M:%S")
 
                 sample_data.append(
                     {
-                        "province_name": province_name,
-                        "station_name": station_name,
+                        "province": province_name,
                         "district": district,
-                        "rainfall_value": rainfall_value,
-                        "rainfall_unit": "mm",
-                        "rainfall_description": self._get_rainfall_description(
-                            rainfall_value
-                        ),
-                        "measurement_time": measure_time.strftime("%Y-%m-%d %H:%M:%S"),
+                        "station_name": station_name,
+                        "station_id": f"ST{hash(station_name) % 1000000:06d}",
                         "latitude": 0,
                         "longitude": 0,
-                        "elevation": random.randint(0, 500),
+                        "timestamp": timestamp,
+                        "data_time": timestamp,
                         "data_source": "vrain.vn (mẫu toàn diện)",
+                        "data_quality": "medium",
+                        "temperature_current": random.uniform(20, 35),
+                        "temperature_max": random.uniform(28, 40),
+                        "temperature_min": random.uniform(18, 28),
+                        "temperature_avg": random.uniform(20, 35),
+                        "humidity_current": random.uniform(60, 95),
+                        "humidity_max": random.uniform(70, 100),
+                        "humidity_min": random.uniform(50, 85),
+                        "humidity_avg": random.uniform(60, 95),
+                        "pressure_current": random.uniform(1000, 1020),
+                        "pressure_max": random.uniform(1005, 1025),
+                        "pressure_min": random.uniform(995, 1015),
+                        "pressure_avg": random.uniform(1000, 1020),
+                        "wind_speed_current": random.uniform(0, 15),
+                        "wind_speed_max": random.uniform(15, 25),
+                        "wind_speed_min": 0,
+                        "wind_speed_avg": random.uniform(0, 12),
+                        "wind_direction_current": random.uniform(0, 360),
+                        "wind_direction_avg": random.uniform(0, 360),
+                        "rain_current": rainfall_value,
+                        "rain_total": rainfall_value,
+                        "rain_avg": rainfall_value,
+                        "rain_min": 0,
+                        "rain_max": rainfall_value * 2,
+                        "cloud_cover_current": random.randint(0, 100),
+                        "cloud_cover_max": random.randint(20, 100),
+                        "cloud_cover_min": random.randint(0, 80),
+                        "cloud_cover_avg": random.randint(0, 100),
+                        "visibility_current": int(random.uniform(5, 20) * 1000),
+                        "visibility_max": int(random.uniform(10, 25) * 1000),
+                        "visibility_min": int(random.uniform(4, 15) * 1000),
+                        "visibility_avg": int(random.uniform(5, 20) * 1000),
+                        "thunder_probability": random.randint(0, 100) if rainfall_value > 0 else 0,
                     }
                 )
 
@@ -2098,9 +2175,12 @@ class VietnamWeatherCrawler:
                 combined_item = {**station, **station_rain_data}
 
                 # Thêm province_id từ provinces_data
+                province_name = combined_item.get("province", combined_item.get("province_name", ""))
                 for province in self.provinces_data:
-                    if province["province_name"] == combined_item.get("province_name"):
+                    if province["province_name"] == province_name:
                         combined_item["province_id"] = province["province_id"]
+                        combined_item["province_name"] = province["province_name"]
+                        combined_item["province"] = province["province_name"]
                         combined_item["latitude"] = province["latitude"]
                         combined_item["longitude"] = province["longitude"]
                         break
@@ -2109,14 +2189,14 @@ class VietnamWeatherCrawler:
 
             # Sắp xếp dữ liệu theo tỉnh và tên trạm
             combined_data.sort(
-                key=lambda x: (x.get("province_name", ""), x.get("station_name", ""))
+                key=lambda x: (x.get("province", x.get("province_name", "")), x.get("station_name", ""))
             )
 
             # Chuyển đổi sang định dạng weather_data
             weather_data = self.convert_vrain_to_weather_format(combined_data)
 
             logging.info(
-                f"✅ Đã thu thập {len(combined_data)} trạm từ {len(set(d['province_name'] for d in combined_data))} tỉnh"
+                f"✅ Đã thu thập {len(combined_data)} trạm từ {len(set(d.get('province', d.get('province_name', '')) for d in combined_data))} tỉnh"
             )
 
             return {"combined": combined_data, "weather": weather_data}
@@ -2131,7 +2211,7 @@ class VietnamWeatherCrawler:
 
         try:
             for data in vrain_data:
-                province_name = data.get("province_name", "")
+                province_name = data.get("province", data.get("province_name", ""))
                 rainfall_value = data.get("rainfall_value", 0)
 
                 # Tìm thông tin tỉnh
@@ -2145,42 +2225,54 @@ class VietnamWeatherCrawler:
                     weather_data = {
                         "station_id": data.get("station_id", ""),
                         "station_name": data.get("station_name", ""),
-                        "province_id": province_info["province_id"],
-                        "province_name": province_name,
+                        "province": province_name,
+                        "district": data.get("district", ""),
                         "latitude": province_info["latitude"],
                         "longitude": province_info["longitude"],
                         "timestamp": data.get(
                             "measurement_time",
                             datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                         ),
-                        "data_source": "vrain.vn (tổng hợp)",
+                        "data_time": data.get(
+                            "measurement_time",
+                            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        ),
+                        "data_source": data.get("data_source", "vrain.vn (tổng hợp)"),
                         "data_quality": "high",
                         # Dữ liệu thời tiết mô phỏng
-                        "temperature": random.uniform(20, 35),
-                        "temperature_feels_like": random.uniform(22, 38),
+                        "temperature_current": random.uniform(20, 35),
+                        "temperature_avg": random.uniform(20, 35),
                         "temperature_min": random.uniform(18, 28),
                         "temperature_max": random.uniform(28, 40),
-                        "humidity": random.uniform(60, 95),
-                        "pressure": random.uniform(1000, 1020),
-                        "wind_speed": random.uniform(0, 15),
-                        "wind_direction": random.uniform(0, 360),
-                        "wind_gust": random.uniform(0, 25),
+                        "humidity_current": random.uniform(60, 95),
+                        "humidity_avg": random.uniform(60, 95),
+                        "humidity_min": random.uniform(50, 85),
+                        "humidity_max": random.uniform(70, 100),
+                        "pressure_current": random.uniform(1000, 1020),
+                        "pressure_avg": random.uniform(1000, 1020),
+                        "pressure_min": random.uniform(995, 1015),
+                        "pressure_max": random.uniform(1005, 1025),
+                        "wind_speed_current": random.uniform(0, 15),
+                        "wind_speed_avg": random.uniform(0, 12),
+                        "wind_speed_min": 0,
+                        "wind_speed_max": random.uniform(15, 25),
+                        "wind_direction_current": random.uniform(0, 360),
+                        "wind_direction_avg": random.uniform(0, 360),
                         # Lượng mưa thực tế từ Vrain
-                        "rainfall_1h": rainfall_value,
-                        "rainfall_3h": rainfall_value * 3,
-                        "rainfall_6h": rainfall_value * 6,
-                        "rainfall_12h": rainfall_value * 12,
-                        "rainfall_24h": rainfall_value * 24,
-                        "rainfall_total": rainfall_value,
-                        "visibility": random.uniform(5, 20),
-                        "cloudiness": random.randint(0, 100),
-                        "weather_main": "Mưa" if rainfall_value > 0 else "Quang mây",
-                        "weather_description": (
-                            f"Mưa {rainfall_value:.1f}mm"
-                            if rainfall_value > 0
-                            else "Trời quang"
-                        ),
-                        "weather_icon": "10d" if rainfall_value > 0 else "01d",
+                        "rain_current": rainfall_value,
+                        "rain_total": rainfall_value,
+                        "rain_avg": rainfall_value,
+                        "rain_min": 0,
+                        "rain_max": rainfall_value * 2,
+                        "visibility_current": int(random.uniform(5, 20) * 1000),
+                        "visibility_avg": int(random.uniform(5, 20) * 1000),
+                        "visibility_min": int(random.uniform(4, 15) * 1000),
+                        "visibility_max": int(random.uniform(10, 25) * 1000),
+                        "cloud_cover_current": random.randint(0, 100),
+                        "cloud_cover_avg": random.randint(0, 100),
+                        "cloud_cover_min": random.randint(0, 80),
+                        "cloud_cover_max": random.randint(20, 100),
+                        "thunder_probability": random.randint(0, 100) if rainfall_value > 0 else 0,
                     }
 
                     weather_data_list.append(weather_data)
@@ -2263,166 +2355,29 @@ class VietnamWeatherCrawler:
             logging.error(f"❌ Lỗi lưu dữ liệu toàn diện: {e}")
             return None
 
-    def save_comprehensive_excel(self, combined_data, output_dir="/PROJECT_WEATHER_FORECAST/Weather_Forcast_App/output"):
+    def save_comprehensive_excel(self, combined_data, output_dir=None):
         """Lưu dữ liệu toàn diện ra file Excel"""
+        if output_dir is None:
+            output_dir = str(OUTPUT_DIR)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         excel_file = os.path.join(
-            output_dir, f"vrain_comprehensive_data_{timestamp}.xlsx"
+            output_dir, f"Bao_cao_{timestamp}.xlsx"
         )
 
         wb = Workbook()
 
-        # ========== SHEET 1: DANH SÁCH TRẠM THEO TỈNH ==========
-        ws_stations = wb.active
-        ws_stations.title = "Trạm Theo Tỉnh"
+        # Sắp xếp dữ liệu theo tỉnh và tên trạm
+        sorted_data = sorted(combined_data, key=lambda x: (x.get("province", x.get("province_name", "")), x.get("station_name", "")))
+
+        # ========== SHEET 1: DỮ LIỆU MƯA THEO TRẠM ==========
+        ws_rainfall = wb.active
+        ws_rainfall.title = "Dữ Liệu Mưa"
 
         # Tiêu đề
-        ws_stations.merge_cells("A1:H1")
-        title_cell = ws_stations.cell(
-            row=1, column=1, value=f"DANH SÁCH TRẠM QUAN TRẮC THEO TỈNH THÀNH"
-        )
-        title_cell.font = Font(bold=True, size=16, color="366092")
-        title_cell.alignment = Alignment(horizontal="center")
-
-        ws_stations.merge_cells("A2:H2")
-        time_cell = ws_stations.cell(
-            row=2,
-            column=1,
-            value=f"Thời gian thu thập: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Tổng số trạm: {len(combined_data)}",
-        )
-        time_cell.font = Font(italic=True, size=10)
-        time_cell.alignment = Alignment(horizontal="center")
-
-        # Header
-        headers = [
-            "STT",
-            "Tỉnh/TP",
-            "Tên Trạm",
-            "Huyện/Quận",
-            "Vĩ độ",
-            "Kinh độ",
-            "Độ cao (m)",
-            "Loại trạm",
-            "Nguồn dữ liệu",
-        ]
-
-        for col_idx, header in enumerate(headers, start=1):
-            cell = ws_stations.cell(row=4, column=col_idx, value=header)
-            cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = PatternFill(
-                start_color="366092", end_color="366092", fill_type="solid"
-            )
-            cell.alignment = Alignment(horizontal="center", vertical="center")
-            cell.border = Border(
-                left=Side(style="thin", color="000000"),
-                right=Side(style="thin", color="000000"),
-                top=Side(style="thin", color="000000"),
-                bottom=Side(style="thin", color="000000"),
-            )
-
-        # Dữ liệu trạm, nhóm theo tỉnh
-        current_province = ""
-        row_idx = 5
-        station_counter = 1
-        province_start_row = 5
-
-        # Sắp xếp dữ liệu theo tỉnh
-        sorted_data = sorted(combined_data, key=lambda x: x.get("province_name", ""))
-
-        for idx, data in enumerate(sorted_data, start=1):
-            province_name = data.get("province_name", "")
-
-            # Nếu đổi tỉnh, thêm dòng phân cách
-            if province_name != current_province:
-                if current_province != "":
-                    # Tô màu cho nhóm tỉnh trước đó
-                    for r in range(province_start_row, row_idx):
-                        for c in range(1, len(headers) + 1):
-                            cell = ws_stations.cell(row=r, column=c)
-                            if r % 2 == 0:
-                                cell.fill = PatternFill(
-                                    start_color="F2F2F2",
-                                    end_color="F2F2F2",
-                                    fill_type="solid",
-                                )
-
-                    # Thêm dòng tổng kết cho tỉnh trước
-                    ws_stations.cell(
-                        row=row_idx, column=2, value=f"Tổng số trạm {current_province}:"
-                    )
-                    ws_stations.cell(
-                        row=row_idx, column=3, value=idx - province_start_row
-                    )
-                    for c in range(1, len(headers) + 1):
-                        cell = ws_stations.cell(row=row_idx, column=c)
-                        cell.fill = PatternFill(
-                            start_color="E6E6FF", end_color="E6E6FF", fill_type="solid"
-                        )
-                        cell.font = Font(bold=True)
-
-                    row_idx += 2
-
-                # Tiêu đề tỉnh mới
-                ws_stations.merge_cells(f"A{row_idx}:H{row_idx}")
-                province_cell = ws_stations.cell(
-                    row=row_idx, column=1, value=f"TỈNH: {province_name}"
-                )
-                province_cell.font = Font(bold=True, size=12, color="FFFFFF")
-                province_cell.fill = PatternFill(
-                    start_color="00B050", end_color="00B050", fill_type="solid"
-                )
-                province_cell.alignment = Alignment(horizontal="center")
-
-                row_idx += 1
-                current_province = province_name
-                province_start_row = row_idx
-                station_counter = 1
-
-            # Dữ liệu trạm
-            row_data = [
-                station_counter,
-                province_name,
-                data.get("station_name", ""),
-                data.get("district", ""),
-                data.get("latitude", 0),
-                data.get("longitude", 0),
-                data.get("elevation", 0),
-                data.get("station_type", "Khí tượng"),
-                data.get("data_source", "vrain.vn"),
-            ]
-
-            for col_idx, value in enumerate(row_data, start=1):
-                cell = ws_stations.cell(row=row_idx, column=col_idx, value=value)
-                cell.alignment = Alignment(horizontal="center", vertical="center")
-
-                cell.border = Border(
-                    left=Side(style="thin", color="CCCCCC"),
-                    right=Side(style="thin", color="CCCCCC"),
-                    top=Side(style="thin", color="CCCCCC"),
-                    bottom=Side(style="thin", color="CCCCCC"),
-                )
-
-            station_counter += 1
-            row_idx += 1
-
-        # Tô màu cho nhóm tỉnh cuối cùng
-        if current_province != "":
-            for r in range(province_start_row, row_idx):
-                for c in range(1, len(headers) + 1):
-                    cell = ws_stations.cell(row=r, column=c)
-                    if (r - province_start_row) % 2 == 0:
-                        cell.fill = PatternFill(
-                            start_color="F2F2F2", end_color="F2F2F2", fill_type="solid"
-                        )
-
-        # ========== SHEET 2: DỮ LIỆU MƯA THEO TRẠM ==========
-        ws_rainfall = wb.create_sheet("Dữ Liệu Mưa")
-
-        # Tiêu đề
-        ws_rainfall.merge_cells("A1:G1")
+        ws_rainfall.merge_cells("A1:D1")
         title_cell = ws_rainfall.cell(
             row=1, column=1, value="DỮ LIỆU LƯỢNG MƯA THEO TRẠM"
         )
@@ -2431,14 +2386,10 @@ class VietnamWeatherCrawler:
 
         # Header
         rain_headers = [
-            "STT",
-            "Tỉnh/TP",
-            "Tên Trạm",
-            "Huyện/Quận",
-            "Lượng Mưa (mm)",
-            "Mô tả",
-            "Thời gian đo",
-            "Nguồn dữ liệu",
+            "Tỉnh/Thành Phố",
+            "Tên trạm",
+            "Tổng lượng mưa",
+            "Thời gian cập nhật",
         ]
 
         for col_idx, header in enumerate(rain_headers, start=1):
@@ -2452,14 +2403,10 @@ class VietnamWeatherCrawler:
         # Dữ liệu mưa
         for idx, data in enumerate(sorted_data, start=1):
             row_data = [
-                idx,
                 data.get("province_name", ""),
                 data.get("station_name", ""),
-                data.get("district", ""),
                 round(data.get("rainfall_value", 0), 2),
-                data.get("rainfall_description", ""),
                 data.get("measurement_time", ""),
-                data.get("data_source", ""),
             ]
 
             for col_idx, value in enumerate(row_data, start=1):
@@ -2489,7 +2436,7 @@ class VietnamWeatherCrawler:
                     bottom=Side(style="thin", color="CCCCCC"),
                 )
 
-        # ========== SHEET 3: THỐNG KÊ THEO TỈNH ==========
+        # ========== SHEET 2: THỐNG KÊ THEO TỈNH ==========
         ws_stats = wb.create_sheet("Thống Kê Tỉnh")
 
         # Tiêu đề
@@ -2608,89 +2555,8 @@ class VietnamWeatherCrawler:
 
             row_idx += 1
 
-        # ========== SHEET 4: TỔNG QUAN ==========
-        ws_summary = wb.create_sheet("Tổng Quan")
-
-        # Tiêu đề
-        ws_summary.merge_cells("A1:D1")
-        title_cell = ws_summary.cell(
-            row=1, column=1, value="TỔNG QUAN HỆ THỐNG TRẠM QUAN TRẮC"
-        )
-        title_cell.font = Font(bold=True, size=14, color="0070C0")
-        title_cell.alignment = Alignment(horizontal="center")
-
-        # Thông tin tổng quan
-        summary_data = [
-            ["Thời điểm thu thập", datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
-            ["Tổng số trạm", len(combined_data)],
-            ["Số tỉnh có dữ liệu", len(province_stats)],
-            [
-                "Tỉnh có nhiều trạm nhất",
-                (
-                    max(province_stats.items(), key=lambda x: len(x[1]["stations"]))[0]
-                    if province_stats
-                    else "N/A"
-                ),
-            ],
-            [
-                "Tỉnh có lượng mưa TB cao nhất",
-                (
-                    max(
-                        province_stats.items(),
-                        key=lambda x: (
-                            sum(x[1]["rainfall_values"]) / len(x[1]["rainfall_values"])
-                            if x[1]["rainfall_values"]
-                            else 0
-                        ),
-                    )[0]
-                    if province_stats
-                    else "N/A"
-                ),
-            ],
-            [
-                "Tổng lượng mưa TB toàn quốc",
-                (
-                    round(
-                        sum(
-                            sum(stats["rainfall_values"])
-                            for stats in province_stats.values()
-                        )
-                        / sum(
-                            len(stats["rainfall_values"])
-                            for stats in province_stats.values()
-                        ),
-                        2,
-                    )
-                    if province_stats
-                    else 0
-                ),
-            ],
-            [
-                "Số trạm có mưa (>0 mm)",
-                sum(1 for data in combined_data if data.get("rainfall_value", 0) > 0),
-            ],
-            [
-                "Số trạm không mưa",
-                sum(1 for data in combined_data if data.get("rainfall_value", 0) == 0),
-            ],
-        ]
-
-        for idx, (label, value) in enumerate(summary_data, start=3):
-            ws_summary.cell(row=idx, column=1, value=label).font = Font(bold=True)
-            ws_summary.cell(row=idx, column=2, value=value)
-
-            # Định dạng
-            for col in [1, 2]:
-                cell = ws_summary.cell(row=idx, column=col)
-                cell.border = Border(
-                    left=Side(style="thin", color="CCCCCC"),
-                    right=Side(style="thin", color="CCCCCC"),
-                    top=Side(style="thin", color="CCCCCC"),
-                    bottom=Side(style="thin", color="CCCCCC"),
-                )
-
         # Điều chỉnh độ rộng cột cho tất cả sheet
-        for ws in [ws_stations, ws_rainfall, ws_stats, ws_summary]:
+        for ws in [ws_rainfall, ws_stats]:
             for column in ws.columns:
                 max_length = 0
                 column_letter = get_column_letter(column[0].column)
@@ -2743,7 +2609,7 @@ def main_comprehensive():
             # Thống kê theo tỉnh
             province_summary = {}
             for data in combined_data:
-                province_name = data.get("province_name", "")
+                province_name = data.get("province", data.get("province_name", ""))
                 if province_name not in province_summary:
                     province_summary[province_name] = {
                         "stations": [],

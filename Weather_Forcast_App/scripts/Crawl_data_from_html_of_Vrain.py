@@ -20,19 +20,16 @@ print("Đang truy cập trang chủ để lấy ngày và giờ cập nhật..."
 driver.get("https://vrain.vn/landing")
 time.sleep(5)
 
-# Lấy toàn bộ văn bản trên trang
 all_text = driver.find_element(By.TAG_NAME, "body").text
 print("  Đang tìm kiếm ngày và giờ trong văn bản trang...")
 
-# Tìm ngày và giờ trong văn bản - THÊM TÌM GIỜ
 date_match = re.search(r"ngày\s*(\d{1,2}/\d{1,2})", all_text)
-hour_match = re.search(r"Tính từ\s*(\d{1,2})h", all_text)  # Tìm giờ từ "Tính từ 19h"
+hour_match = re.search(r"Tính từ\s*(\d{1,2})h", all_text)
 
 if date_match and hour_match:
     date_from_main = date_match.group(1)
     hour_from_main = hour_match.group(1)
     current_year = datetime.now().strftime("%Y")
-    # Tạo chuỗi ngày và giờ: dd/mm/YYYY HH:00
     unified_datetime_info = f"{date_from_main}/{current_year} {hour_from_main}:00"
     print(f"  Đã lấy ngày và giờ cập nhật từ trang chủ: {unified_datetime_info}")
 elif date_match:
@@ -45,10 +42,8 @@ elif date_match:
 else:
     unified_datetime_info = "N/A"
     print("  Cảnh báo: Không tìm thấy ngày cập nhật. Sử dụng ngày và giờ hiện tại.")
-    # Sử dụng ngày và giờ hiện tại
     unified_datetime_info = datetime.now().strftime("%d/%m/%Y %H:%M")
 
-# Lấy thời gian crawl chi tiết (ngày, giờ, phút, giây)
 current_crawl_datetime = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
 # Danh sách các URL tỉnh thành
@@ -89,22 +84,21 @@ province_urls = [
     "https://vrain.vn/52/overview?public_map=windy",
 ]
 
-OUTPUT_DIR = Path("/PROJECT_WEATHER_FORECAST/Weather_Forcast_App/output")
+OUTPUT_DIR = Path("/media/voanhnhat/SDD_OUTSIDE5/PROJECT_WEATHER_FORECAST/Weather_Forcast_App/output")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-csv_path = OUTPUT_DIR / f"luong_mua_thong_ke_selenium_{timestamp}.csv"
+csv_path = OUTPUT_DIR / f"Bao_cao_{timestamp}.csv"
 
 with open(csv_path, "w", newline="", encoding="utf-8-sig") as csvfile:
-    # THÊM CỘT "Thời gian crawl" (có giờ, phút, giây)
     fieldnames = [
-        "Tỉnh",
-        "Trạm",
-        "Xã/Phường",
-        "Lượng mưa (mm)",
+        "Tỉnh/Thành phố",
+        "Tên trạm",
+        "Huyện",
+        "Tổng lượng mưa",
         "Tình trạng",
-        "Ngày và giờ cập nhật",
-        "Thời gian crawl",
+        "Dấu thời gian",
+        "Thời gian cập nhập",
     ]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
@@ -186,13 +180,13 @@ with open(csv_path, "w", newline="", encoding="utf-8-sig") as csvfile:
 
                 writer.writerow(
                     {
-                        "Tỉnh": province_name,
-                        "Trạm": station_name,
-                        "Xã/Phường": xa_phuong,
-                        "Lượng mưa (mm)": rainfall,
+                        "Tỉnh/Thành phố": province_name,
+                        "Tên trạm": station_name,
+                        "Huyện": xa_phuong,
+                        "Tổng lượng mưa": rainfall,
                         "Tình trạng": status,
-                        "Ngày và giờ cập nhật": datetime_info,
-                        "Thời gian crawl": current_crawl_datetime,
+                        "Dấu thời gian": datetime_info,
+                        "Thời gian cập nhập": current_crawl_datetime,
                     }
                 )
 

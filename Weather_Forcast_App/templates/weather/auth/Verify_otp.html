@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nhập OTP</title>
+  <link rel="stylesheet" href="{% static 'weather/css/Auth.css' %}?v=2001">
+</head>
+<body class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card glass-effect">
+      <h1 class="auth-title">Xác thực OTP</h1>
+      <p class="auth-subtitle">OTP đã gửi đến: <b>{{ email }}</b></p>
+
+      {% if messages %}
+        <div class="auth-messages">
+          {% for message in messages %}
+            <div class="auth-alert auth-alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'weather:verify_otp' %}" class="auth-form">
+        {% csrf_token %}
+        <input type="hidden" name="email" value="{{ email }}">
+        <div class="form-group animated-input">
+          <label class="form-label">Mã OTP (6 số)</label>
+          <div class="input-wrapper">
+            <input type="text" name="otp" class="form-input" placeholder="Nhập OTP" required minlength="6" maxlength="6">
+            <span class="input-border"></span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-full btn-glow" type="submit">
+          <span class="btn-text">Xác nhận</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

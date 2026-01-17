@@ -25,6 +25,13 @@ from .views.View_Clear import (
     clean_data_tail_view,
 )
 
+from .views.View_login import (
+    login_view, register_view, logout_view, profile_view,
+    forgot_password_view, password_reset_sent_view,
+    reset_password_view, password_reset_complete_view,
+    forgot_password_otp_view, verify_otp_view, reset_password_otp_view,
+)
+
 app_name = "weather"
 
 urlpatterns = [
@@ -56,5 +63,17 @@ urlpatterns = [
     path("datasets/clean/", clean_data_view, name="clean_data"),
     path("datasets/clean/list/", clean_files_list_view, name="clean_list"),
     path("datasets/clean/tail/", clean_data_tail_view, name="clean_tail"),
+    
+    path("auth/login/", login_view, name="login"),
+    path("auth/register/", register_view, name="register"),
+    path("auth/logout/", logout_view, name="logout"),
+    path("auth/profile/", profile_view, name="profile"),
+    path("auth/forgot-password/", forgot_password_view, name="forgot_password"),
+    path("auth/password-reset-sent/", password_reset_sent_view, name="password_reset_sent"),
+
+    # OTP flow
+    path("auth/forgot-password-otp/", forgot_password_otp_view, name="forgot_password_otp"),
+    path("auth/verify-otp/", verify_otp_view, name="verify_otp"),
+    path("auth/reset-password-otp/", reset_password_otp_view, name="reset_password_otp"),
 
 ]

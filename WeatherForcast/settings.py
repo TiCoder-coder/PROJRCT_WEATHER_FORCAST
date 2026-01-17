@@ -13,24 +13,31 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from decouple import config
 from dotenv import load_dotenv
+from decouple import config
 import os
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 print("Loaded .env from:", os.path.join(BASE_DIR, ".env"))
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("SECRET_KEY")
+MONGO_URI = config("MONGO_URI", default="")
+DB_NAME = config("DB_NAME", default="Login")
+JWT_SECRET = config("JWT_SECRET", default="")
+JWT_ALGORITHM = config("JWT_ALGORITHM", default="HS256")
+ACCESS_TOKEN_EXPIRE_HOURS = config("ACCESS_TOKEN_EXPIRE_HOURS", cast=int, default=3)
+REFRESH_TOKEN_EXPIRE_DAYS = config("REFRESH_TOKEN_EXPIRE_DAYS", cast=int, default=1)
+JWT_ISSUER = config("JWT_ISSUER", default="weather_api")
+JWT_AUDIENCE = config("JWT_AUDIENCE", default="weather_web")
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False  # csrf token vẫn cần cho form nếu bạn dùng JS fetch
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 
-# SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -71,20 +78,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "WeatherForcast.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -101,10 +100,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "Asia/Ho_Chi_Minh"
@@ -112,15 +107,21 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / "Weather_Forcast_App" / "static",
 ]
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config("EMAIL_HOST", default="")
+EMAIL_PORT = config("EMAIL_PORT", cast=int, default=587)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool, default=True)
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
+
+PASSWORD_RESET_OTP_EXPIRE_SECONDS = config("PASSWORD_RESET_OTP_EXPIRE_SECONDS", cast=int, default=600)
+PASSWORD_RESET_OTP_MAX_ATTEMPTS = config("PASSWORD_RESET_OTP_MAX_ATTEMPTS", cast=int, default=5)
+

@@ -15,6 +15,13 @@
         </div>
         <nav class="home-nav">
             <button type="button" class="nav-pill" id="btnIntro">Giới thiệu</button>
+            {% if user.is_authenticated %}
+                <a href="{% url 'weather:profile' %}" class="nav-pill">👤 {{ user.username }}</a>
+                <a href="{% url 'weather:logout' %}" class="nav-pill nav-logout">Đăng xuất</a>
+            {% else %}
+                <a href="{% url 'weather:login' %}" class="nav-pill nav-login">Đăng nhập</a>
+                <a href="{% url 'weather:register' %}" class="nav-pill nav-register">Đăng ký</a>
+            {% endif %}
         </nav>
     </header>
      
